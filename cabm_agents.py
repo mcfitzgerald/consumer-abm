@@ -3,7 +3,12 @@ import numpy as np
 import toml
 
 # Import library functions for ConsumerAgent
-from LIB_consumer_agent import get_pantry_max, get_current_price
+from LIB_consumer_agent import (
+    get_pantry_max,
+    get_current_price,
+    compute_total_purchases,
+    compute_average_price,
+)
 
 # Import config file
 config = toml.load("config.toml")
@@ -43,59 +48,82 @@ class ConsumerAgent(mesa.Agent):
         self.step_max = 0
 
     def consume(self):
-        self.pantry_stock = self.pantry_stock - (
-            self.household_size / self.consumption_rate
-        )
+        try:
+            self.pantry_stock = self.pantry_stock - (
+                self.household_size / self.consumption_rate
+            )
+        except ZeroDivisionError:
+            print("Error: Consumption rate cannot be zero.")
+        except Exception as e:
+            print("An unexpected error occurred:", e)
 
     def set_purchase_behavior(self):
-        self.current_price = get_current_price(
-            base_product_price, promo_depths, promo_frequencies
-        )
-        price_dropped = self.current_price < self.last_product_price
-        if self.pantry_stock <= self.pantry_min:
-            self.purchase_behavior = "buy_maximum" if price_dropped else "buy_minimum"
-        elif self.pantry_min < self.pantry_stock < self.pantry_max:
-            self.purchase_behavior = (
-                "buy_maximum" if price_dropped else "buy_some_or_none"
-            )
-        elif self.pantry_stock >= self.pantry_max:
-            self.purchase_behavior = "buy_none"
-
-    # def set_purchase_behavior(self):
-    #     self.current_price = get_current_price(
-    #         base_product_price, promo_depths, promo_frequencies
-    #     )
-    #     if self.pantry_stock <= self.pantry_min:
-    #         if self.current_price >= base_product_price:
-    #             self.purchase_behavior = "buy_minimum"
-    #         elif self.current_price < self.last_product_price:
-    #             self.purchase_behavior = "buy_maximum"
-    #         else:
-    #             self.purchase_behavior = "buy_minimum"
-    #     elif self.pantry_min < self.pantry_stock < self.pantry_max:
-    #         if self.current_price >= base_product_price:
-    #             self.purchase_behavior = "buy_some_or_none"
-    #         elif self.current_price < self.last_product_price:
-    #             self.purchase_behavior = "buy_maximum"
-    #         else:
-    #             self.purchase_behavior = "buy_some_or_none"
-    #     elif self.pantry_stock >= self.pantry_max:
-    #         self.purchase_behavior = "buy_none"
+        try:
+            self.current_price = get_current_price(base_product_price)
+            price_dropped = self.current_price < self.last_product_price
+            if self.pantry_stock <= self.pantry_min:
+                self.purchase_behavior = (
+                    "buy_maximum" if price_dropped else "buy_minimum"
+                )
+            elif self.pantry_min < self.pantry_stock < self.pantry_max:
+                self.purchase_behavior = (
+                    "buy_maximum" if price_dropped else "buy_some_or_none"
+                )
+            elif self.pantry_stock >= self.pantry_max:
+                self.purchase_behavior = "buy_none"
+        except Exception as e:
+            print("An unexpected error occurred in set_purchase_behavior:", e)
 
     def purchase(self):
-        if self.purchase_behavior == "buy_minimum":
-            self.purchased_this_step = self.step_min
-        elif self.purchase_behavior == "buy_maximum":
-            self.purchased_this_step = self.step_max
-        elif self.purchase_behavior == "buy_some_or_none":
-            self.purchased_this_step = np.random.randint(
-                self.step_min, self.step_max + 1
-            )
-        else:
-            self.purchased_this_step = 0
-        self.pantry_stock += self.purchased_this_step
+        try:
+            purchase_behaviors = {
+                "buy_minimum": self.step_min,
+                "buy_maximum": self.step_max,
+                "buy_some_or_none": np.random.randint(self.step_min, self.step_max + 1),
+                "buy_none": 0,
+            }
+            self.purchased_this_step = purchase_behaviors.get(self.purchase_behavior, 0)
+            self.pantry_stock += self.purchased_this_step
+        except Exception as e:
+            print("An unexpected error occurred in purchase:", e)
 
     def step(self):
         self.consume()
         self.set_purchase_behavior()
         self.purchase()
+
+
+class ConsumerModel(mesa.Model):
+    """A model with some number of agents."""
+
+    def __init__(self, N):
+        self.num_agents = N
+        self.schedule = mesa.time.RandomActivation(self)
+
+        # Create agents
+        for i in range(self.num_agents):
+            a = ConsumerAgent(i, self)
+            self.schedule.add(a)
+
+        self.datacollector = mesa.DataCollector(
+            model_reporters={
+                "Total_Purchases": compute_total_purchases,
+                "Average_Product_Price": compute_average_price,
+            },
+            agent_reporters={
+                "Household_Size": "household_size",
+                "Purchased_This_Step": "purchased_this_step",
+                "Pantry_Stock": "pantry_stock",
+                "Pantry_Max": "pantry_max",
+                "Pantry_Min": "pantry_min",
+                "Purchase_Behavior": "purchase_behavior",
+                "Minimum_Purchase_Needed": "step_min",
+                "Current_Product_Price": "current_price",
+                "Last_Product_Price": "last_product_price",
+            },
+        )
+
+    def step(self):
+        self.datacollector.collect(self)
+        """Advance the model by one step and collect data"""
+        self.schedule.step()

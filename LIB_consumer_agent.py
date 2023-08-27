@@ -7,10 +7,13 @@ def get_pantry_max(household_size, pantry_min):
     Statistical assignment of maximum number of products a given household stocks
     Pantry min must be set before calling (default behavior of agent class)
     """
-    pantry_max = math.ceil(np.random.normal(household_size, 1))
-    if pantry_max < pantry_min:
-        pantry_max = math.ceil(pantry_min)
-    return pantry_max
+    try:
+        pantry_max = math.ceil(np.random.normal(household_size, 1))
+        if pantry_max < pantry_min:
+            pantry_max = math.ceil(pantry_min)
+        return pantry_max
+    except Exception as e:
+        print("An unexpected error occurred in get_pantry_max:", e)
 
 
 def get_current_price(base_product_price, promo_depths, promo_frequencies):
@@ -23,19 +26,27 @@ def get_current_price(base_product_price, promo_depths, promo_frequencies):
 
     Above example will return a price that is 4.99 50% of the time, 3.74 and 2.50 25% of the time
     """
-
-    promo_depth = np.random.choice(promo_depths, p=promo_frequencies)
-    current_price = base_product_price * promo_depth
-    return current_price
+    try:
+        promo_depth = np.random.choice(promo_depths, p=promo_frequencies)
+        current_price = base_product_price * promo_depth
+        return current_price
+    except Exception as e:
+        print("An unexpected error occurred in get_current_price:", e)
 
 
 def compute_total_purchases(model):
     """Model-level KPI: sum of total purchases across agents each step"""
-    purchases = [agent.purchased_this_step for agent in model.schedule.agents]
-    return sum(purchases)
+    try:
+        purchases = [agent.purchased_this_step for agent in model.schedule.agents]
+        return sum(purchases)
+    except Exception as e:
+        print("An unexpected error occurred in compute_total_purchases:", e)
 
 
 def compute_average_price(model):
     """Model-level KPI: average product price each step"""
-    prices = [agent.current_price for agent in model.schedule.agents]
-    return np.mean(prices)
+    try:
+        prices = [agent.current_price for agent in model.schedule.agents]
+        return np.mean(prices)
+    except Exception as e:
+        print("An unexpected error occurred in compute_average_price:", e)
