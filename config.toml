@@ -1,0 +1,21 @@
+# Number of persons in household - approx percentage for 1,2...7 people in USA - from Statista
+houseshold_sizes = [1,2,3,4,5,6,7]
+houseshold_size_distribution = [0.28,0.36,0.15,0.12,0.06,0.02,0.01]
+
+# Consumption rate: number of steps per person neded to consume 1 product
+# E.g. a consumption rate of 3 means that a product is consumed by one person in 3 steps
+# Concretely, that could mean a tube of toothpaste takes 3 weeks to use per person
+# Consumption rates are defined statistically via absolute value of a normal distribution
+base_consumption_rate = 3
+
+# Pantry minimum percent (percent of household size)
+pantry_min_percent = 0.1 # when pantry drops below 20% of household size, consumer must buy to replenish
+
+# Base product price
+base_product_price = 5
+
+# Promo depth
+promo_depths=[1.0, 0.75, 0.5]
+
+# Promo frequencies
+promo_frequencies=[0.5, 0.25, 0.25]
