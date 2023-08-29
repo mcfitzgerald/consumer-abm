@@ -2,6 +2,7 @@ import math
 import numpy as np
 
 
+# Household setup functions
 def get_pantry_max(household_size, pantry_min):
     """
     Statistical assignment of maximum number of products a given household stocks
@@ -14,6 +15,10 @@ def get_pantry_max(household_size, pantry_min):
         return pantry_max
     except Exception as e:
         print("An unexpected error occurred in get_pantry_max:", e)
+
+
+# Consumer choice functions
+# def assign_brand_preferences(brands):
 
 
 def get_current_price(base_product_price, promo_depths, promo_frequencies):
@@ -34,6 +39,7 @@ def get_current_price(base_product_price, promo_depths, promo_frequencies):
         print("An unexpected error occurred in get_current_price:", e)
 
 
+# Model reporting functions
 def compute_total_purchases(model):
     """Model-level KPI: sum of total purchases across agents each step"""
     try:

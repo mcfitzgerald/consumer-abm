@@ -40,7 +40,7 @@ Start
   |     |--- Else If self.pantry_min < self.pantry_stock < self.pantry_max
   |     |     |
   |     |     |--- If price dropped, set self.purchase_behavior to "buy_maximum"
-  |     |     |--- Else, set self.purchase_behavior to "buy_some_or_none"
+  |     |     |--- Else, set self.purchase_behavior to "buy_some_or_none" 
   |     |
   |     |--- Else If self.pantry_stock >= self.pantry_max
   |     |     |
@@ -50,6 +50,8 @@ Start
         |
         |--- Print error message
 End
+
+* buy_some_or_none: randomly choose between purchasing 0 or maximum amount
 ```
 
 ## Contributing

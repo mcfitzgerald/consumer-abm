@@ -2,6 +2,15 @@ import mesa
 import numpy as np
 import toml
 
+config = toml.load("config.toml")
+
+household_sizes = config["household"]["household_sizes"]
+household_size_distribution = config["household"]["household_size_distribution"]
+base_consumption_rate = config["household"]["base_consumption_rate"]
+pantry_min_percent = config["household"]["pantry_min_percent"]
+base_product_price = config["brands"]["A"]["base_product_price"]
+promo_depths = config["brands"]["A"]["promo_depths"]
+promo_frequencies = config["brands"]["A"]["promo_frequencies"]
 
 # Import library functions for ConsumerAgent
 from LIB_consumer_agent import (
@@ -11,17 +20,6 @@ from LIB_consumer_agent import (
     compute_average_price,
 )
 
-# Import config file
-config = toml.load("config.toml")
-
-houseshold_sizes = config["houseshold_sizes"]
-houseshold_size_distribution = config["houseshold_size_distribution"]
-base_consumption_rate = config["base_consumption_rate"]
-pantry_min_percent = config["pantry_min_percent"]
-base_product_price = config["base_product_price"]
-promo_depths = config["promo_depths"]
-promo_frequencies = config["promo_frequencies"]
-
 
 class ConsumerAgent(mesa.Agent):
     """Consumer of products"""
@@ -29,7 +27,7 @@ class ConsumerAgent(mesa.Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         self.household_size = np.random.choice(
-            houseshold_sizes, p=houseshold_size_distribution
+            household_sizes, p=household_size_distribution
         )
         self.consumption_rate = abs(
             np.random.normal(base_consumption_rate, 1)
@@ -60,6 +58,7 @@ class ConsumerAgent(mesa.Agent):
 
     def set_purchase_behavior(self):
         try:
+            print(self.model.week_number)
             self.current_price = get_current_price(
                 base_product_price, promo_depths, promo_frequencies
             )
@@ -102,6 +101,7 @@ class ConsumerModel(mesa.Model):
     def __init__(self, N):
         self.num_agents = N
         self.schedule = mesa.time.RandomActivation(self)
+        self.week_number = 1  # Add week_number attribute
 
         # Create agents
         for i in range(self.num_agents):
@@ -112,6 +112,7 @@ class ConsumerModel(mesa.Model):
             model_reporters={
                 "Total_Purchases": compute_total_purchases,
                 "Average_Product_Price": compute_average_price,
+                "Week_Number": "week_number",
             },
             agent_reporters={
                 "Household_Size": "household_size",
@@ -130,3 +131,9 @@ class ConsumerModel(mesa.Model):
         self.datacollector.collect(self)
         """Advance the model by one step and collect data"""
         self.schedule.step()
+        self.week_number += 1  # Increment week_number each step
+        if self.week_number == 53:  # Reset week_number to 1 after 52 weeks
+            self.week_number = 1
+
+    def get_week_number(self):
+        return self.week_number
