@@ -2,6 +2,7 @@ import mesa
 import numpy as np
 import toml
 
+
 # Import library functions for ConsumerAgent
 from LIB_consumer_agent import (
     get_pantry_max,
@@ -59,7 +60,9 @@ class ConsumerAgent(mesa.Agent):
 
     def set_purchase_behavior(self):
         try:
-            self.current_price = get_current_price(base_product_price)
+            self.current_price = get_current_price(
+                base_product_price, promo_depths, promo_frequencies
+            )
             price_dropped = self.current_price < self.last_product_price
             if self.pantry_stock <= self.pantry_min:
                 self.purchase_behavior = (

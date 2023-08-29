@@ -6,9 +6,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
-
-%matplotlib inline
-
 # %%
 # Set plot aesthetics
 
@@ -244,57 +241,3 @@ res.predict()
 pred_ols = res.get_prediction()
 iv_l = pred_ols.summary_frame()["obs_ci_lower"]
 iv_u = pred_ols.summary_frame()["obs_ci_upper"]
-
-# %%
-fig, ax = plt.subplots(figsize=(8, 6))
-ax.plot(dat['Average_Product_Price'], res.fittedvalues)
-ax.plot(dat['Average_Product_Price'], iv_u, 'r-')
-ax.plot(dat['Average_Product_Price'], iv_l, "r-")
-ax.plot(dat['Average_Product_Price'], dat['Total_Purchases'],'o')
-
-# %%
-ax.plot(dat['Average_Product_Price'], res.predict())
-
-
-# %%
-agent_dat = model.datacollector.get_agent_vars_dataframe()
-
-# %%
-agent_dat.head()
-
-# %%
-total_purchases = model.datacollector.get_model_vars_dataframe()['Total_Purchases']
-step_index = np.array((range(len(total_purchases))))
-
-# %%
-total_purchases_FFT = fft(total_purchases)
-
-# %%
-N = len(total_purchases)
-
-# %%
-fig = plt.figure()
-ax1 = fig.add_subplot(111)
-ax2 = ax1.twiny()
-
-ax1.plot(step_index[:N//2][1:],np.abs(total_purchases_FFT[:N//2][1:]))
-ax1.set_xlabel(r"Number of Steps")
-ax1.set_ylabel(r"FFT of Total Purchases")
-
-new_tick_locations = [300/5,300/4,300/3]
-ax2.set_xlim(ax1.get_xlim())
-ax2.set_xticks(new_tick_locations)
-ax2.set_xticklabels([5,4,3])
-ax2.set_xlabel(r"Consumption Rates (steps per product)")
-
-
-# %%
-model_summary_df.to_csv("model_summary.csv")
-
-# %%
-agent_summary_df.to_pickle("agent_summary.pkl")
-
-# %%
-
-
-
