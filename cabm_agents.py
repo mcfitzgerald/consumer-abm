@@ -135,5 +135,5 @@ class ConsumerModel(mesa.Model):
         if self.week_number == 53:  # Reset week_number to 1 after 52 weeks
             self.week_number = 1
 
-    def get_week_number(self):
-        return self.week_number
+    # def get_week_number(self):
+    #     return self.week_number
