@@ -3,7 +3,7 @@ import numpy as np
 from typing import Dict, List
 
 
-def generate_ad_schedule(
+def generate_brand_ad_schedule(
     budget: int,
     media_channels: List[str],
     priority: Dict[str, int],
