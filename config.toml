@@ -38,7 +38,6 @@ budget = 52000.0
 channels = ["TV", "Web"]
 priority = {TV = 40, Web = 60}
 ad_campaigns = {TV = "first_three_weeks_per_quarter", Web = "holiday_season"}
-spend_structure = {TV = "constant", Web = "constant"} # Expand another day for staggered, pulse, etc.
 
 
 
@@ -55,7 +54,6 @@ budget = 48000.0
 channels = ["TV", "Web"]
 priority = {TV = 30, Web = 70}
 ad_campaigns = {TV = "first_three_weeks_per_quarter", Web = "holiday_season"}
-spend_structure = {TV = "constant", Web = "constant"} # Expand another day for staggered, pulse, etc.
 
 # You can add additional brands here
 

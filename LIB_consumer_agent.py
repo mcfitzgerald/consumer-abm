@@ -39,22 +39,6 @@ def get_current_price(base_product_price, promo_depths, promo_frequencies):
         print("An unexpected error occurred in get_current_price:", e)
 
 
-# Brand handling functions
-def create_brand_class(brand_config):
-    """Reads brand section from config toml and creates a brand class"""
-    try:
-        brand_class = Brand(
-            brand_name=brand_config["brand_name"],
-            base_product_price=brand_config["base_product_price"],
-            promo_depths=brand_config["promo_depths"],
-            promo_frequencies=brand_config["promo_frequencies"],
-            brand_preferences=brand_config["brand_preferences"],
-        )
-        return brand_class
-    except Exception as e:
-        print("An unexpected error occurred in create_brand_class:", e)
-
-
 # Model reporting functions
 def compute_total_purchases(model):
     """Model-level KPI: sum of total purchases across agents each step"""
