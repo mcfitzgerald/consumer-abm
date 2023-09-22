@@ -30,7 +30,7 @@ name = "Brand A"
 current_market_share = 0.6
 base_product_price = 5.0
 [brands.A.promotions]
-promo_depths=[1.0, 0.75, 0.5]
+promo_depths=[0.0, 0.25, 0.5]
 promo_frequencies=[0.5, 0.25, 0.25]
 promo_calendar = ["first_three_weeks_per_quarter", "holiday_season"]
 [brands.A.advertising]
@@ -46,7 +46,7 @@ name = "Brand B"
 current_market_share = 0.4
 base_product_price = 5.0
 [brands.B.promotions]
-promo_depths=[1.0, 0.75, 0.5]
+promo_depths=[0.0, 0.25, 0.5]
 promo_frequencies=[0.5, 0.25, 0.25]
 promo_calendar = ["first_three_weeks_per_quarter", "holiday_season"]
 [brands.B.advertising]
