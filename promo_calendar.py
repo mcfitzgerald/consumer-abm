@@ -8,7 +8,7 @@ def prepare_promo_schedule_variables(brand: str, config: Dict) -> tuple:
 
     Args:
         brand (str): The brand for which the promo schedule is being prepared.
-        config (Dict): The configuration dictionary containing all the necessary data.
+        config (Dict): The configuration dictionary containing all the necessary data, read from a toml file.
 
     Returns:
         tuple: A tuple containing the base product price, promo depths, promo frequencies, and promo weeks.
@@ -25,23 +25,20 @@ def prepare_promo_schedule_variables(brand: str, config: Dict) -> tuple:
         promo_depths = promo_info["promo_depths"]
         promo_frequencies = promo_info["promo_frequencies"]
         promo_calendar = promo_info["promo_calendar"]
-        promo_weeks = list(
-            set(
-                [
-                    week
-                    for campaign in promo_calendar
-                    for week in config["ad_campaigns"][campaign]
-                ]
-            )
-        )
+        promo_weeks = []
+        for campaign in promo_calendar:
+            if campaign not in config["ad_campaigns"]:
+                raise KeyError(f"{campaign} is not found in the configuration.")
+            promo_weeks.extend(config["ad_campaigns"][campaign])
+        promo_weeks = list(set(promo_weeks))
 
         return base_product_price, promo_depths, promo_frequencies, promo_weeks
     except KeyError as e:
         print(f"KeyError: {e} is not found in the configuration.")
-        return None
+        raise
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-        return None
+        raise
 
 
 def generate_brand_promo_schedule(
