@@ -73,8 +73,14 @@ def generate_brand_ad_schedule(
                 )
             else:
                 spending_distribution = spending_strategy(len(schedule[channel]))
-            for week, proportion in zip(schedule[channel], spending_distribution):
-                df.loc[week, channel] = budget * (priority[channel] / 100) * proportion
+            for week, proportion in zip(schedule[channel], spending_distribution[:-1]):
+                df.loc[week, channel] = round(
+                    budget * (priority[channel] / 100) * proportion, 2
+                )
+            # Adjust the budget for the last week
+            df.loc[schedule[channel][-1], channel] = (
+                budget * (priority[channel] / 100) - df[channel].sum()
+            )
 
         # Replace NaN values with 0
         df = df.replace(np.nan, 0)
