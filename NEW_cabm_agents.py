@@ -13,7 +13,9 @@ pantry_min_percent = config["household"]["pantry_min_percent"]
 
 # Set up retail environment
 brand_list = list(config["brands"].keys())
-brand_market_share = [config["brands"][brand]["current_market_share"] for brand in brand_list]
+brand_market_share = [
+    config["brands"][brand]["current_market_share"] for brand in brand_list
+]
 try:
     assert round(sum(brand_market_share), 2) == 1.0
 except AssertionError:
@@ -73,7 +75,7 @@ class ConsumerAgent(mesa.Agent):
         except Exception as e:
             print("An unexpected error occurred:", e)
 
-    def ad_exposure(self):
+    # def ad_exposure(self):
 
     def set_purchase_behavior(self):
         try:
