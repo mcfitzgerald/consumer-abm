@@ -2,6 +2,14 @@ import mesa
 import numpy as np
 import toml
 from joint_calendar import generate_joint_ad_promo_schedule
+from ad_helpers import generate_brand_ad_channel_map, assign_weights, calculate_adstock
+from NEW_LIB_consumer_agent import (
+    get_pantry_max,
+    get_current_price,
+    compute_total_purchases,
+    compute_average_price,
+)
+
 
 config = toml.load("config.toml")
 
@@ -21,22 +29,16 @@ try:
 except AssertionError:
     print("Error: Brand market shares do not sum to 1.")
 
+
 # Set up advertising and promotion
 joint_calendar = generate_joint_ad_promo_schedule(brand_list, config)
-
-
-# These need to be changed to functions that are dependent on agent
-# base_product_price = config["brands"]["A"]["base_product_price"]
-# promo_depths = config["brands"]["A"]["promo_depths"]
-# promo_frequencies = config["brands"]["A"]["promo_frequencies"]
-
-# Import library functions for ConsumerAgent
-from LIB_consumer_agent import (
-    get_pantry_max,
-    get_current_price,
-    compute_total_purchases,
-    compute_average_price,
+brand_channel_map = generate_brand_ad_channel_map(brand_list, config)
+channel_set = set(
+    channel for channels in brand_channel_map.values() for channel in channels
 )
+channel_priors = [
+    config["household"]["base_channel_preferences"][channel] for channel in channel_set
+]
 
 
 class ConsumerAgent(mesa.Agent):
@@ -51,14 +53,20 @@ class ConsumerAgent(mesa.Agent):
             np.random.normal(base_consumption_rate, 1)
         )  # Applied at household level
         self.brand_preference = np.random.choice(brand_list, p=brand_market_share)
+        self.ad_channel_preference = assign_weights(channel_set, channel_priors)
+        self.adstock = {i: 0 for i in brand_list}
         self.pantry_min = (
             self.household_size * pantry_min_percent
         )  # Forces must-buy when stock drops percentage of household size
         self.pantry_max = get_pantry_max(self.household_size, self.pantry_min)
         self.pantry_stock = self.pantry_max  # Start with a fully stocked pantry
         self.purchased_this_step = 0
-        self.current_price = base_product_price
-        self.last_product_price = base_product_price
+        self.current_price = config["brands"][self.brand_preference][
+            "base_product_price"
+        ]
+        self.last_product_price = config["brands"][self.brand_preference][
+            "base_product_price"
+        ]
         self.purchase_behavior = "buy_minimum"
         self.step_min = (
             0  # fewest number of products needed to bring stock above pantry minimum
@@ -81,7 +89,7 @@ class ConsumerAgent(mesa.Agent):
         try:
             print(self.model.week_number)
             self.current_price = get_current_price(
-                base_product_price, promo_depths, promo_frequencies
+                self.model.week_number, joint_calendar, self.brand_preference
             )
             price_dropped = self.current_price < self.last_product_price
             if self.pantry_stock <= self.pantry_min:

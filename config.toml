@@ -14,6 +14,8 @@ base_consumption_rate = 3
 # Pantry minimum percent (percent of household size)
 pantry_min_percent = 0.1 # when pantry drops below 20% of household size, consumer must buy to replenish
 
+base_channel_preferences = {TV = 0.4, Web = 0.6} # if using other channels, add them here - must sum to 1
+
 [brands]
 # Base product price - the sticker price of a product
 # Promo depths - the percentage of the base price that a promo reduces the price by
@@ -38,8 +40,6 @@ budget = 52000.0
 channels = ["TV", "Web"]
 priority = {TV = 40, Web = 60}
 ad_campaigns = {TV = "first_three_weeks_per_quarter", Web = "holiday_season"}
-
-
 
 [brands.B]
 name = "Brand B"
