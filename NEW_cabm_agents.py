@@ -1,3 +1,4 @@
+import math
 import mesa
 import numpy as np
 import toml
@@ -97,26 +98,44 @@ class ConsumerAgent(mesa.Agent):
             print("An unexpected error occurred:", e)
 
     def ad_exposure(self):
-        # 1) Decay current self.adstock
-        self.adstock = ad_decay(self.adstock, self.ad_decay_factor)
+        """
+        This function handles the ad exposure for the consumer agent.
+        It decays the current adstock, calculates the weekly adstock,
+        updates the adstock, generates switching probabilities, and
+        updates the preferred brand based on switching.
+        """
+        try:
+            # 1) Decay current self.adstock
+            self.adstock = ad_decay(self.adstock, self.ad_decay_factor)
 
-        # 2) Calculate this week's adstock
-        weekly_adstock = calculate_adstock(
-            self.model.week_number,
-            joint_calendar,
-            brand_channel_map,
-            self.ad_channel_preference,
-        )
+            # 2) Calculate this week's adstock
+            weekly_adstock = calculate_adstock(
+                self.model.week_number,
+                joint_calendar,
+                brand_channel_map,
+                self.ad_channel_preference,
+            )
 
-        # 3) Update self.adstock
-        self.adstock = update_adstock(self.adstock, weekly_adstock)
+            # 3) Update self.adstock
+            self.adstock = update_adstock(self.adstock, weekly_adstock)
 
-        # 4) Generate switching probabilities
-        self.switching_probabilities = get_switch_probability(self.adstock)
+            # 4) Generate switching probabilities
+            self.switching_probabilities = get_switch_probability(
+                self.adstock, self.brand_preference, self.loyalty_rate
+            )
+            # 5) Update preferred brand based on switching
+            brands = list(self.switching_probabilities.keys())
+            probabilities = list(self.switching_probabilities.values())
+            self.brand_preference = np.random.choice(brands, p=probabilities)
+        except ZeroDivisionError:
+            print("Error: Division by zero in ad_exposure.")
+        except KeyError as e:
+            print(f"KeyError occurred: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred in ad_exposure: {e}")
 
     def set_purchase_behavior(self):
         try:
-            print(self.model.week_number)
             self.current_price = get_current_price(
                 self.model.week_number, joint_calendar, self.brand_preference
             )
@@ -135,14 +154,34 @@ class ConsumerAgent(mesa.Agent):
             print("An unexpected error occurred in set_purchase_behavior:", e)
 
     def purchase(self):
+        """
+        This method simulates the purchase behavior of the consumer agent.
+        It first resets the purchase count for the current step.
+        Then, it determines the minimum and maximum possible purchases for the step based on the current pantry stock.
+        Depending on the purchase behavior, it updates the purchase count and the pantry stock.
+        """
         try:
-            purchase_behaviors = {
-                "buy_minimum": self.step_min,
-                "buy_maximum": self.step_max,
-                "buy_some_or_none": np.random.randint(self.step_min, self.step_max + 1),
-                "buy_none": 0,
-            }
-            self.purchased_this_step = purchase_behaviors.get(self.purchase_behavior, 0)
+            self.purchased_this_step = 0  # Reset purchase count
+            # Determine purchase needed this step to maintain pantry_min or above
+            if self.pantry_stock <= self.pantry_min:
+                self.step_min = math.ceil(self.pantry_min - self.pantry_stock)
+            else:
+                self.step_min = 0
+            # Set max possible purchase for step
+            self.step_max = math.floor(self.pantry_max - self.pantry_stock)
+            # Update purchase count based on purchase behavior
+            if self.purchase_behavior == "buy_minimum":
+                self.purchased_this_step += self.step_min
+            elif self.purchase_behavior == "buy_maximum":
+                self.purchased_this_step += self.step_max
+            elif self.purchase_behavior == "buy_some_or_none":
+                # Include 0 as a possible purchase even if pantry not full
+                self.purchased_this_step += np.random.choice(
+                    list(range(0, (self.step_max + 1)))
+                )
+            elif self.purchase_behavior == "buy_none":
+                self.purchased_this_step += 0  # No purchase
+            # Update pantry stock
             self.pantry_stock += self.purchased_this_step
         except Exception as e:
             print("An unexpected error occurred in purchase:", e)
@@ -192,6 +231,3 @@ class ConsumerModel(mesa.Model):
         self.week_number += 1  # Increment week_number each step
         if self.week_number == 53:  # Reset week_number to 1 after 52 weeks
             self.week_number = 1
-
-    # def get_week_number(self):
-    #     return self.week_number
