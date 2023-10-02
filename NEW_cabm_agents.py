@@ -2,7 +2,14 @@ import mesa
 import numpy as np
 import toml
 from joint_calendar import generate_joint_ad_promo_schedule
-from ad_helpers import generate_brand_ad_channel_map, assign_weights, calculate_adstock
+from ad_helpers import (
+    generate_brand_ad_channel_map,
+    assign_weights,
+    calculate_adstock,
+    update_adstock,
+    get_switch_probability,
+    ad_decay,
+)
 from NEW_LIB_consumer_agent import (
     get_pantry_max,
     get_current_price,
@@ -31,6 +38,7 @@ except AssertionError:
 
 
 # Set up advertising and promotion
+ad_decay_factor = config["household"]["ad_decay_factor"]
 joint_calendar = generate_joint_ad_promo_schedule(brand_list, config)
 brand_channel_map = generate_brand_ad_channel_map(brand_list, config)
 channel_set = set(
@@ -53,8 +61,13 @@ class ConsumerAgent(mesa.Agent):
             np.random.normal(base_consumption_rate, 1)
         )  # Applied at household level
         self.brand_preference = np.random.choice(brand_list, p=brand_market_share)
+        self.loyalty_rate = np.random.uniform(0.6, 1.0)
+        self.ad_decay_factor = abs(np.random.normal(ad_decay_factor, 1))
         self.ad_channel_preference = assign_weights(channel_set, channel_priors)
         self.adstock = {i: 0 for i in brand_list}
+        self.switching_probabilities = get_switch_probability(
+            self.adstock, self.brand_preference, self.loyalty_rate
+        )
         self.pantry_min = (
             self.household_size * pantry_min_percent
         )  # Forces must-buy when stock drops percentage of household size
@@ -83,7 +96,23 @@ class ConsumerAgent(mesa.Agent):
         except Exception as e:
             print("An unexpected error occurred:", e)
 
-    # def ad_exposure(self):
+    def ad_exposure(self):
+        # 1) Decay current self.adstock
+        self.adstock = ad_decay(self.adstock, self.ad_decay_factor)
+
+        # 2) Calculate this week's adstock
+        weekly_adstock = calculate_adstock(
+            self.model.week_number,
+            joint_calendar,
+            brand_channel_map,
+            self.ad_channel_preference,
+        )
+
+        # 3) Update self.adstock
+        self.adstock = update_adstock(self.adstock, weekly_adstock)
+
+        # 4) Generate switching probabilities
+        self.switching_probabilities = get_switch_probability(self.adstock)
 
     def set_purchase_behavior(self):
         try:

@@ -16,6 +16,8 @@ pantry_min_percent = 0.1 # when pantry drops below 20% of household size, consum
 
 base_channel_preferences = {TV = 0.4, Web = 0.6} # if using other channels, add them here - must sum to 1
 
+ad_decay_factor = 2.0 # the higher the number, the faster the adstock decay, this just divides the adstock by the number each week
+
 [brands]
 # Base product price - the sticker price of a product
 # Promo depths - the percentage of the base price that a promo reduces the price by
