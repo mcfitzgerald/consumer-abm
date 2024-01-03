@@ -31,7 +31,7 @@ ad_decay_factor = 2.0 # the higher the number, the faster the adstock decay, thi
 
 [brands.A]
 name = "Brand A"
-current_market_share = 0.6
+current_market_share = 0.7
 base_product_price = 5.0
 [brands.A.promotions]
 promo_depths=[0.0, 0.25, 0.5]
@@ -45,7 +45,7 @@ ad_campaigns = {TV = "first_three_weeks_per_quarter", Web = "holiday_season"}
 
 [brands.B]
 name = "Brand B"
-current_market_share = 0.4
+current_market_share = 0.3
 base_product_price = 5.0
 [brands.B.promotions]
 promo_depths=[0.0, 0.25, 0.5]
@@ -55,7 +55,7 @@ promo_calendar = ["first_three_weeks_per_quarter", "holiday_season"]
 budget = 48000.0
 channels = ["TV", "Web"]
 priority = {TV = 30, Web = 70}
-ad_campaigns = {TV = "first_three_weeks_per_quarter", Web = "holiday_season"}
+ad_campaigns = {TV = "summer_sale", Web = "back_to_school"}
 
 # You can add additional brands here
 
