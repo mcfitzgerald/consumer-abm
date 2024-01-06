@@ -1,5 +1,5 @@
 import pytest
-from promo_calendar import prepare_promo_schedule_variables
+from cabm_function_library.promo_calendar import prepare_promo_schedule_variables
 
 
 def test_prepare_promo_schedule_variables():

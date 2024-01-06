@@ -2,8 +2,8 @@ import math
 import mesa
 import numpy as np
 import toml
-from joint_calendar import generate_joint_ad_promo_schedule
-from ad_helpers import (
+from cabm_function_library.joint_calendar import generate_joint_ad_promo_schedule
+from cabm_function_library.ad_helpers import (
     generate_brand_ad_channel_map,
     assign_weights,
     calculate_adstock,
@@ -11,7 +11,7 @@ from ad_helpers import (
     get_switch_probability,
     ad_decay,
 )
-from NEW_LIB_consumer_agent import (
+from cabm_function_library.agent_and_model_functions import (
     get_pantry_max,
     get_current_price,
     compute_total_purchases,
