@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from ad_helpers import *
+from cabm_function_library.ad_helpers import *
 
 
 def test_generate_brand_ad_channel_map():

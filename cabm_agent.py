@@ -66,6 +66,7 @@ class ConsumerAgent(mesa.Agent):
         self.brand_preference = np.random.choice(
             self.model.brand_list, p=brand_market_share
         )
+        print(f"init brand pref: {self.brand_preference}")
         self.loyalty_rate = np.random.uniform(0.6, 1.0)
         self.ad_decay_factor = abs(np.random.normal(ad_decay_factor, 1))
         self.ad_channel_preference = assign_weights(channel_set, channel_priors)
@@ -73,6 +74,7 @@ class ConsumerAgent(mesa.Agent):
         self.switching_probabilities = get_switch_probability(
             self.adstock, self.brand_preference, self.loyalty_rate
         )
+        print(f"init switch prob: {self.switching_probabilities}")
         self.pantry_min = (
             self.household_size * pantry_min_percent
         )  # Forces must-buy when stock drops percentage of household size
@@ -130,10 +132,16 @@ class ConsumerAgent(mesa.Agent):
             # 5) Update preferred brand based on switching
             brands = list(self.switching_probabilities.keys())
             probabilities = list(self.switching_probabilities.values())
-            self.brand_preference = np.random.choice(brands, p=probabilities)
+            self.brand_preference = np.random.choice(
+                self.model.brand_list, p=probabilities
+            )
 
-            ## DEBUG STATEMENT
-            print("ad_exposure method variables: ", locals())
+            ## DEBUG STATEMENTS
+            print(
+                f"ad exposure effect: switching {self.switching_probabilities} preference: {self.brand_preference}"
+            )
+            ## print("ad_exposure method variables: ", locals())
+            ##print(self.brand_preference)
         except ZeroDivisionError:
             print("Error: Division by zero in ad_exposure.")
         except KeyError as e:
@@ -159,40 +167,6 @@ class ConsumerAgent(mesa.Agent):
                 self.purchase_behavior = "buy_none"
         except Exception as e:
             print("An unexpected error occurred in set_purchase_behavior:", e)
-
-    # ORIGINAL PURCHASE FUNCTION - DOESN'T TRACK WHICH BRAND IS PURCHASED
-    # def purchase(self):
-    #     """
-    #     This method simulates the purchase behavior of the consumer agent.
-    #     It first resets the purchase count for the current step.
-    #     Then, it determines the minimum and maximum possible purchases for the step based on the current pantry stock.
-    #     Depending on the purchase behavior, it updates the purchase count and the pantry stock.
-    #     """
-    #     try:
-    #         self.purchased_this_step = 0  # Reset purchase count
-    #         # Determine purchase needed this step to maintain pantry_min or above
-    #         if self.pantry_stock <= self.pantry_min:
-    #             self.step_min = math.ceil(self.pantry_min - self.pantry_stock)
-    #         else:
-    #             self.step_min = 0
-    #         # Set max possible purchase for step
-    #         self.step_max = math.floor(self.pantry_max - self.pantry_stock)
-    #         # Update purchase count based on purchase behavior
-    #         if self.purchase_behavior == "buy_minimum":
-    #             self.purchased_this_step += self.step_min
-    #         elif self.purchase_behavior == "buy_maximum":
-    #             self.purchased_this_step += self.step_max
-    #         elif self.purchase_behavior == "buy_some_or_none":
-    #             # Include 0 as a possible purchase even if pantry not full
-    #             self.purchased_this_step += np.random.choice(
-    #                 list(range(0, (self.step_max + 1)))
-    #             )
-    #         elif self.purchase_behavior == "buy_none":
-    #             self.purchased_this_step += 0  # No purchase
-    #         # Update pantry stock
-    #         self.pantry_stock += self.purchased_this_step
-    #     except Exception as e:
-    #         print("An unexpected error occurred in purchase:", e)
 
     def purchase(self):
         """

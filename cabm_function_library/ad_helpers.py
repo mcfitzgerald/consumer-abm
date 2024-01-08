@@ -151,7 +151,12 @@ def get_switch_probability(
         brands = list(adstock.keys())
         adstock_values = list(adstock.values())
 
+        # DEBUG
+        print(f"adstock used in getprob function: {adstock}")
+
         if adstock[preferred_brand] > max(adstock_values):
+            # DEBUG
+            print("gretprob used first branch")
             return {brand: 1 if brand == preferred_brand else 0 for brand in brands}
 
         elif sum(adstock_values) == 0:
@@ -161,6 +166,8 @@ def get_switch_probability(
                 else (1 - default_loyalty_rate) / (len(brands) - 1)
                 for brand in brands
             }
+            # DEBUG
+            print("gretprob used second branch")
             return probabilities
 
         else:
@@ -168,6 +175,8 @@ def get_switch_probability(
             probabilities = {
                 brand: value / total_adstock for brand, value in adstock.items()
             }
+            # DEBUG
+            print("gretprob used third branch")
             return probabilities
     except ZeroDivisionError:
         print("Error: Division by zero.")
