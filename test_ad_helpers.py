@@ -76,13 +76,40 @@ def test_update_adstock():
     assert update_adstock(adstock1, adstock2) == expected_output
 
 
-def test_get_switch_probability():
-    adstock = {"brand1": 100, "brand2": 200, "brand3": 300}
-    preferred_brand = "brand2"
-    default_loyalty_rate = 0.1
-    probabilities = get_switch_probability(
-        adstock, preferred_brand, default_loyalty_rate
+# def test_get_switch_probability():
+#     adstock = {"brand1": 100, "brand2": 200, "brand3": 300}
+#     preferred_brand = "brand2"
+#     default_loyalty_rate = 0.1
+#     probabilities = get_switch_probability(
+#         adstock, preferred_brand, default_loyalty_rate
+#     )
+#     assert isinstance(probabilities, dict)
+#     assert len(probabilities) == len(adstock)
+#     assert sum(probabilities.values()) == pytest.approx(1.0)
+
+
+def test_get_purchase_probabilities():
+    adstock = {"brand1": 1265, "brand2": 0, "brand3": 245}
+    preferred_brand = "brand1"
+    loyalty_rate = 0.6
+    sensitivity = 0.5
+
+    probabilities = get_purchase_probabilities(
+        adstock, preferred_brand, loyalty_rate, sensitivity
     )
+
+    # Check if the function returns a dictionary
     assert isinstance(probabilities, dict)
-    assert len(probabilities) == len(adstock)
+
+    # Print probabilities
+    print(probabilities)
+
+    # Check if the dictionary has the correct keys
+    assert set(probabilities.keys()) == set(adstock.keys())
+
+    # Check if the probabilities sum to 1
     assert sum(probabilities.values()) == pytest.approx(1.0)
+
+    # Check if no brand gets a purchase probability of zero
+    for prob in probabilities.values():
+        assert prob > 0

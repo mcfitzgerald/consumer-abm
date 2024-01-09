@@ -8,7 +8,7 @@ from cabm_function_library.ad_helpers import (
     assign_weights,
     calculate_adstock,
     update_adstock,
-    get_switch_probability,
+    get_purchase_probabilities,
     ad_decay,
 )
 from cabm_function_library.agent_and_model_functions import (
@@ -71,10 +71,13 @@ class ConsumerAgent(mesa.Agent):
         self.ad_decay_factor = abs(np.random.normal(ad_decay_factor, 1))
         self.ad_channel_preference = assign_weights(channel_set, channel_priors)
         self.adstock = {i: 0 for i in self.model.brand_list}
-        self.switching_probabilities = get_switch_probability(
-            self.adstock, self.brand_preference, self.loyalty_rate
-        )
-        print(f"init switch prob: {self.switching_probabilities}")
+        self.purchase_probabilities = {
+            brand: self.loyalty_rate
+            if brand == self.brand_preference
+            else (1 - self.loyalty_rate) / (len(self.model.brand_list) - 1)
+            for brand in self.model.brand_list
+        }
+        print(f"initial purchase probabilties: {self.purchase_probabilities}")
         self.pantry_min = (
             self.household_size * pantry_min_percent
         )  # Forces must-buy when stock drops percentage of household size
@@ -107,8 +110,8 @@ class ConsumerAgent(mesa.Agent):
         """
         This function handles the ad exposure for the consumer agent.
         It decays the current adstock, calculates the weekly adstock,
-        updates the adstock, generates switching probabilities, and
-        updates the preferred brand based on switching.
+        updates the adstock, generates purchase probabilities, and
+        updates the preferred brand based on advertising effects.
         """
         try:
             # 1) Decay current self.adstock
@@ -125,20 +128,20 @@ class ConsumerAgent(mesa.Agent):
             # 3) Update self.adstock
             self.adstock = update_adstock(self.adstock, weekly_adstock)
 
-            # 4) Generate switching probabilities
-            self.switching_probabilities = get_switch_probability(
+            # 4) Generate purchase probabilities
+            self.purchase_probabilities = get_purchase_probabilities(
                 self.adstock, self.brand_preference, self.loyalty_rate
             )
-            # 5) Update preferred brand based on switching
-            brands = list(self.switching_probabilities.keys())
-            probabilities = list(self.switching_probabilities.values())
+            # 5) Update preferred brand based purchase probabilities
+            brands = list(self.purchase_probabilities.keys())
+            probabilities = list(self.purchase_probabilities.values())
             self.brand_preference = np.random.choice(
                 self.model.brand_list, p=probabilities
             )
 
             ## DEBUG STATEMENTS
             print(
-                f"ad exposure effect: switching {self.switching_probabilities} preference: {self.brand_preference}"
+                f"ad exposure effect on purchase probabilities: {self.purchase_probabilities} preference: {self.brand_preference}"
             )
             ## print("ad_exposure method variables: ", locals())
             ##print(self.brand_preference)
