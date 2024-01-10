@@ -37,7 +37,8 @@ try:
 except AssertionError:
     print("Error: Brand market shares do not sum to 1.")
 
-print(brand_market_share)
+# DEBUG PRINT STATEMENT
+# print(brand_market_share)
 
 
 # Set up advertising and promotion
@@ -66,18 +67,21 @@ class ConsumerAgent(mesa.Agent):
         self.brand_preference = np.random.choice(
             self.model.brand_list, p=brand_market_share
         )
-        print(f"init brand pref: {self.brand_preference}")
-        self.loyalty_rate = np.random.uniform(0.6, 1.0)
+        # DEBUG PRINT STATEMENT
+        # print(f"init brand pref: {self.brand_preference}")
+        self.loyalty_rate = np.random.uniform(0.8, 1.0)
         self.ad_decay_factor = abs(np.random.normal(ad_decay_factor, 1))
         self.ad_channel_preference = assign_weights(channel_set, channel_priors)
         self.adstock = {i: 0 for i in self.model.brand_list}
+        self.ad_sensitivity = np.random.uniform(0.1, 0.7)
         self.purchase_probabilities = {
             brand: self.loyalty_rate
             if brand == self.brand_preference
             else (1 - self.loyalty_rate) / (len(self.model.brand_list) - 1)
             for brand in self.model.brand_list
         }
-        print(f"initial purchase probabilties: {self.purchase_probabilities}")
+        # DEBUG PRINT STATEMENT
+        # print(f"initial purchase probabilties: {self.purchase_probabilities}")
         self.pantry_min = (
             self.household_size * pantry_min_percent
         )  # Forces must-buy when stock drops percentage of household size
@@ -130,19 +134,20 @@ class ConsumerAgent(mesa.Agent):
 
             # 4) Generate purchase probabilities
             self.purchase_probabilities = get_purchase_probabilities(
-                self.adstock, self.brand_preference, self.loyalty_rate
+                self.adstock,
+                self.brand_preference,
+                self.loyalty_rate,
+                self.ad_sensitivity,
             )
             # 5) Update preferred brand based purchase probabilities
             brands = list(self.purchase_probabilities.keys())
             probabilities = list(self.purchase_probabilities.values())
-            self.brand_preference = np.random.choice(
-                self.model.brand_list, p=probabilities
-            )
+            self.brand_preference = np.random.choice(brands, p=probabilities)
 
-            ## DEBUG STATEMENTS
-            print(
-                f"ad exposure effect on purchase probabilities: {self.purchase_probabilities} preference: {self.brand_preference}"
-            )
+            ## DEBUG PRINT STATEMENTS
+            # print(
+            #   f"ad exposure effect on purchase probabilities: {self.purchase_probabilities} preference: {self.brand_preference}"
+            # )
             ## print("ad_exposure method variables: ", locals())
             ##print(self.brand_preference)
         except ZeroDivisionError:
