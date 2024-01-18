@@ -23,8 +23,8 @@ loyalty_alpha = 10
 loyalty_beta = 2
 
 # Ad sensitivity
-sensitivity_alpha = 5
-sensitivity_beta = 3
+sensitivity_alpha = 2
+sensitivity_beta = 5
 
 [brands]
 # Base product price - the sticker price of a product

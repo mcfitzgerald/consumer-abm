@@ -58,6 +58,15 @@ channel_priors = [
 ]
 
 
+### TEST USING A BETA SAMPLER THAT AVOIDS SMALL VALUES
+def sample_beta_min(alpha, beta, min_value=0.05):
+    """Sample from a beta distribution, rejecting values less than min_value."""
+    sample = np.random.beta(alpha, beta)
+    while abs(sample) < min_value:
+        sample = np.random.beta(alpha, beta)
+    return sample
+
+
 class ConsumerAgent(mesa.Agent):
     """Consumer of products"""
 
@@ -74,11 +83,11 @@ class ConsumerAgent(mesa.Agent):
         )
         # DEBUG PRINT STATEMENT
         # print(f"init brand pref: {self.brand_preference}")
-        self.loyalty_rate = np.random.beta(loyalty_alpha, loyalty_beta)
+        self.loyalty_rate = sample_beta_min(loyalty_alpha, loyalty_beta)
         self.ad_decay_factor = abs(np.random.normal(ad_decay_factor, 1))
         self.ad_channel_preference = assign_weights(channel_set, channel_priors)
         self.adstock = {i: 0 for i in self.model.brand_list}
-        self.ad_sensitivity = np.random.beta(sensitivity_alpha, sensitivity_beta)
+        self.ad_sensitivity = sample_beta_min(sensitivity_alpha, sensitivity_beta)
         self.purchase_probabilities = {
             brand: self.loyalty_rate
             if brand == self.brand_preference
