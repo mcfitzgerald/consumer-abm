@@ -19,10 +19,12 @@ base_channel_preferences = {TV = 0.4, Web = 0.6} # if using other channels, add 
 ad_decay_factor = 2.0 # the higher the number, the faster the adstock decay, this just divides the adstock by the number each week
 
 # Purchase loyalty - upper and lower bounds for uniform distribution over agents
-loyalty_lb = 0.6
-loyalty_up = 1.0
+loyalty_alpha = 10
+loyalty_beta = 2
 
 # Ad sensitivity
+sensitivity_alpha = 5
+sensitivity_beta = 3
 
 [brands]
 # Base product price - the sticker price of a product

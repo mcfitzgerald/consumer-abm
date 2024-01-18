@@ -45,6 +45,11 @@ except AssertionError:
 ad_decay_factor = config["household"]["ad_decay_factor"]
 joint_calendar = generate_joint_ad_promo_schedule(brand_list, config)
 brand_channel_map = generate_brand_ad_channel_map(brand_list, config)
+loyalty_alpha = config["household"]["loyalty_alpha"]
+loyalty_beta = config["household"]["loyalty_beta"]
+sensitivity_alpha = config["household"]["sensitivity_alpha"]
+sensitivity_beta = config["household"]["sensitivity_beta"]
+
 channel_set = set(
     channel for channels in brand_channel_map.values() for channel in channels
 )
@@ -69,11 +74,11 @@ class ConsumerAgent(mesa.Agent):
         )
         # DEBUG PRINT STATEMENT
         # print(f"init brand pref: {self.brand_preference}")
-        self.loyalty_rate = np.random.uniform(0.8, 1.0)
+        self.loyalty_rate = np.random.beta(loyalty_alpha, loyalty_beta)
         self.ad_decay_factor = abs(np.random.normal(ad_decay_factor, 1))
         self.ad_channel_preference = assign_weights(channel_set, channel_priors)
         self.adstock = {i: 0 for i in self.model.brand_list}
-        self.ad_sensitivity = np.random.uniform(0.1, 0.7)
+        self.ad_sensitivity = np.random.beta(sensitivity_alpha, sensitivity_beta)
         self.purchase_probabilities = {
             brand: self.loyalty_rate
             if brand == self.brand_preference
