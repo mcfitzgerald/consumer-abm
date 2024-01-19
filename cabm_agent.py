@@ -1,7 +1,8 @@
 import math
 import mesa
-import numpy as np
 import toml
+import warnings
+import numpy as np
 from cabm_function_library.joint_calendar import generate_joint_ad_promo_schedule
 from cabm_function_library.ad_helpers import (
     generate_brand_ad_channel_map,
@@ -59,8 +60,12 @@ channel_priors = [
 
 
 ### TEST USING A BETA SAMPLER THAT AVOIDS SMALL VALUES
-def sample_beta_min(alpha, beta, min_value=0.05):
-    """Sample from a beta distribution, rejecting values less than min_value."""
+def sample_beta_min(alpha, beta, min_value=0.05, override=None):
+    """Sample from a beta distribution, rejecting values less than min_value.
+    If override is specified, return only that value."""
+    if override is not None:
+        warnings.warn("Beta Sampler Override is in effect.")
+        return override
     sample = np.random.beta(alpha, beta)
     while abs(sample) < min_value:
         sample = np.random.beta(alpha, beta)
@@ -83,11 +88,13 @@ class ConsumerAgent(mesa.Agent):
         )
         # DEBUG PRINT STATEMENT
         # print(f"init brand pref: {self.brand_preference}")
-        self.loyalty_rate = sample_beta_min(loyalty_alpha, loyalty_beta)
+        self.loyalty_rate = sample_beta_min(loyalty_alpha, loyalty_beta, override=1.0)
         self.ad_decay_factor = abs(np.random.normal(ad_decay_factor, 1))
         self.ad_channel_preference = assign_weights(channel_set, channel_priors)
         self.adstock = {i: 0 for i in self.model.brand_list}
-        self.ad_sensitivity = sample_beta_min(sensitivity_alpha, sensitivity_beta)
+        self.ad_sensitivity = sample_beta_min(
+            sensitivity_alpha, sensitivity_beta, override=0.0
+        )
         self.purchase_probabilities = {
             brand: self.loyalty_rate
             if brand == self.brand_preference

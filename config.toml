@@ -19,8 +19,8 @@ base_channel_preferences = {TV = 0.4, Web = 0.6} # if using other channels, add 
 ad_decay_factor = 2.0 # the higher the number, the faster the adstock decay, this just divides the adstock by the number each week
 
 # Purchase loyalty - upper and lower bounds for uniform distribution over agents
-loyalty_alpha = 10
-loyalty_beta = 2
+loyalty_alpha = 100
+loyalty_beta = 10
 
 # Ad sensitivity
 sensitivity_alpha = 2
@@ -49,7 +49,7 @@ promo_calendar = ["first_three_weeks_per_quarter", "holiday_season"]
 budget = 52000.0
 channels = ["TV", "Web"]
 priority = {TV = 40, Web = 60}
-ad_campaigns = {TV = "first_three_weeks_per_quarter", Web = "holiday_season"}
+ad_campaigns = {TV = "first_three_weeks_per_quarter", Web = "back_to_school"}
 
 [brands.B]
 name = "Brand B"
@@ -63,7 +63,7 @@ promo_calendar = ["first_three_weeks_per_quarter", "holiday_season"]
 budget = 48000.0
 channels = ["TV", "Web"]
 priority = {TV = 30, Web = 70}
-ad_campaigns = {TV = "summer_sale", Web = "back_to_school"}
+ad_campaigns = {TV = "first_three_weeks_per_quarter", Web = "back_to_school"}
 
 # You can add additional brands here
 
