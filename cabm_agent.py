@@ -2,6 +2,7 @@ import math
 import mesa
 import toml
 import warnings
+import logging
 import numpy as np
 from cabm_function_library.joint_calendar import generate_joint_ad_promo_schedule
 from cabm_function_library.ad_helpers import (
@@ -19,6 +20,23 @@ from cabm_function_library.agent_and_model_functions import (
     compute_average_price,
 )
 
+# config logger
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.ERROR)
+
+file_handler = logging.FileHandler("cabm.log")
+file_handler.setLevel(logging.DEBUG)
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s",
+    handlers=[file_handler, stream_handler],
+)
+
+# create logger
+logger = logging.getLogger(__name__)
+
+logger.info("CABM RUNTIME STARTED")
 
 config = toml.load("config.toml")
 
@@ -117,6 +135,8 @@ class ConsumerAgent(mesa.Agent):
             0  # fewest number of products needed to bring stock above pantry minimum
         )
         self.step_max = 0
+
+        logger.debug(f"Initial Household Size: {self.household_size}")
 
         # self.DEBUG_print_initial_variables()
 

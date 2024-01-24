@@ -1,7 +1,10 @@
 import random
-from typing import List, Dict
+import logging
 import numpy as np
 import pandas as pd
+from typing import List, Dict
+
+logger = logging.getLogger(__name__)
 
 
 def generate_brand_ad_channel_map(brand_list: List[str], config: Dict) -> Dict:
@@ -15,6 +18,7 @@ def generate_brand_ad_channel_map(brand_list: List[str], config: Dict) -> Dict:
     Returns:
     dict: A dictionary mapping brands to their advertising channels.
     """
+    logger.info("generating brand ad channel map")
     brand_ad_channel_map = {}
     try:
         for brand in brand_list:
