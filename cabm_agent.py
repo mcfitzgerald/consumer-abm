@@ -93,7 +93,7 @@ def sample_beta_min(alpha, beta, min_value=0.05, override=None):
 class ConsumerAgent(mesa.Agent):
     """Consumer of products"""
 
-    def __init__(self, unique_id, model, enable_ads=True):
+    def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         self.household_size = np.random.choice(
             household_sizes, p=household_size_distribution
@@ -104,14 +104,12 @@ class ConsumerAgent(mesa.Agent):
         self.brand_preference = np.random.choice(
             self.model.brand_list, p=brand_market_share
         )
-        self.loyalty_rate = sample_beta_min(loyalty_alpha, loyalty_beta, override=1.0)
+        self.loyalty_rate = sample_beta_min(loyalty_alpha, loyalty_beta)
         self.enable_ads = self.model.enable_ads
         self.ad_decay_factor = abs(np.random.normal(ad_decay_factor, 1))
         self.ad_channel_preference = assign_weights(channel_set, channel_priors)
         self.adstock = {i: 0 for i in self.model.brand_list}
-        self.ad_sensitivity = sample_beta_min(
-            sensitivity_alpha, sensitivity_beta, override=0.0
-        )
+        self.ad_sensitivity = sample_beta_min(sensitivity_alpha, sensitivity_beta)
         self.purchase_probabilities = {
             brand: self.loyalty_rate
             if brand == self.brand_preference
@@ -136,30 +134,30 @@ class ConsumerAgent(mesa.Agent):
         )
         self.step_max = 0
 
-        logger.debug(f"Initial Household Size: {self.household_size}")
+        # logger.debug(f"Initial Household Size: {self.household_size}")
 
         # self.DEBUG_print_initial_variables()
 
-    def DEBUG_print_initial_variables(self):
-        print("Initialized Variables:")
-        print(f"Household Size: {self.household_size}")
-        print(f"Consumption Rate: {self.consumption_rate}")
-        print(f"Brand Preference: {self.brand_preference}")
-        print(f"Loyalty Rate: {self.loyalty_rate}")
-        print(f"Ad Decay Factor: {self.ad_decay_factor}")
-        print(f"Ad Channel Preference: {self.ad_channel_preference}")
-        print(f"Adstock: {self.adstock}")
-        print(f"Ad Sensitivity: {self.ad_sensitivity}")
-        print(f"Purchase Probabilities: {self.purchase_probabilities}")
-        print(f"Pantry Min: {self.pantry_min}")
-        print(f"Pantry Max: {self.pantry_max}")
-        print(f"Pantry Stock: {self.pantry_stock}")
-        print(f"Purchased This Step: {self.purchased_this_step}")
-        print(f"Current Price: {self.current_price}")
-        print(f"Last Product Price: {self.last_product_price}")
-        print(f"Purchase Behavior: {self.purchase_behavior}")
-        print(f"Step Min: {self.step_min}")
-        print(f"Step Max: {self.step_max}")
+    # def DEBUG_print_initial_variables(self):
+    #     print("Initialized Variables:")
+    #     print(f"Household Size: {self.household_size}")
+    #     print(f"Consumption Rate: {self.consumption_rate}")
+    #     print(f"Brand Preference: {self.brand_preference}")
+    #     print(f"Loyalty Rate: {self.loyalty_rate}")
+    #     print(f"Ad Decay Factor: {self.ad_decay_factor}")
+    #     print(f"Ad Channel Preference: {self.ad_channel_preference}")
+    #     print(f"Adstock: {self.adstock}")
+    #     print(f"Ad Sensitivity: {self.ad_sensitivity}")
+    #     print(f"Purchase Probabilities: {self.purchase_probabilities}")
+    #     print(f"Pantry Min: {self.pantry_min}")
+    #     print(f"Pantry Max: {self.pantry_max}")
+    #     print(f"Pantry Stock: {self.pantry_stock}")
+    #     print(f"Purchased This Step: {self.purchased_this_step}")
+    #     print(f"Current Price: {self.current_price}")
+    #     print(f"Last Product Price: {self.last_product_price}")
+    #     print(f"Purchase Behavior: {self.purchase_behavior}")
+    #     print(f"Step Min: {self.step_min}")
+    #     print(f"Step Max: {self.step_max}")
 
     def consume(self):
         try:
@@ -206,11 +204,7 @@ class ConsumerAgent(mesa.Agent):
             self.brand_preference = np.random.choice(brands, p=probabilities)
 
             ## DEBUG PRINT STATEMENTS
-            # print(
-            #   f"ad exposure effect on purchase probabilities: {self.purchase_probabilities} preference: {self.brand_preference}"
-            # )
-            ## print("ad_exposure method variables: ", locals())
-            ##print(self.brand_preference)
+            print(f"Agent: {self.unique_id}; Adstock: {self.adstock}")
         except ZeroDivisionError:
             print("Error: Division by zero in ad_exposure.")
         except KeyError as e:
@@ -274,7 +268,7 @@ class ConsumerAgent(mesa.Agent):
 
     def step(self):
         self.consume()
-        if self.enable_ads:
+        if self.model.enable_ads:
             self.ad_exposure()
         self.set_purchase_behavior()
         self.purchase()

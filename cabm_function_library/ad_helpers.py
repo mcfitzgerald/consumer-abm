@@ -109,10 +109,15 @@ def ad_decay(adstock: Dict, factor: float) -> Dict:
     """
     try:
         return {brand: value / factor for brand, value in adstock.items()}
+    except RuntimeError:
+        logger.error(f"current adstock: {adstock}")
+        logger.error(f"current adstock: {factor}")
     except ZeroDivisionError:
         print("Error: Decay factor cannot be zero.")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+        logger.error(f"current adstock: {adstock}")
+        logger.error(f"current adstock: {factor}")
 
 
 def update_adstock(adstock1: Dict, adstock2: Dict) -> Dict:
