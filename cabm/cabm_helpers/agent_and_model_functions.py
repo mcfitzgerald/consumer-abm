@@ -1,12 +1,27 @@
 import math
+import warnings
 import numpy as np
 
-# config = toml.load("config.toml")
 
-# brand_list = list(config["brands"].keys())
+# General Helper Functions
+
+
+# A BETA SAMPLER THAT AVOIDS SMALL VALUES
+def sample_beta_min(alpha, beta, min_value=0.05, override=None):
+    """Sample from a beta distribution, rejecting values less than min_value.
+    If override is specified, return only that value."""
+    if override is not None:
+        warnings.warn("Beta Sampler Override is in effect.")
+        return override
+    sample = np.random.beta(alpha, beta)
+    while abs(sample) < min_value:
+        sample = np.random.beta(alpha, beta)
+    return sample
 
 
 # Household setup functions
+
+
 def get_pantry_max(household_size, pantry_min):
     """
     Statistical assignment of maximum number of products a given household stocks
@@ -22,7 +37,6 @@ def get_pantry_max(household_size, pantry_min):
 
 
 # Consumer choice functions
-# def assign_brand_preferences(brands):
 
 
 def get_current_price(week, joint_calendar, brand):
@@ -31,13 +45,6 @@ def get_current_price(week, joint_calendar, brand):
 
 
 # Model reporting functions
-# def compute_total_purchases(model):
-#     """Model-level KPI: sum of total purchases across agents each step"""
-#     try:
-#         purchases = [agent.purchased_this_step for agent in model.schedule.agents]
-#         return sum(purchases)
-#     except Exception as e:
-#         print("An unexpected error occurred in compute_total_purchases:", e)
 
 
 def compute_total_purchases(model):

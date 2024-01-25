@@ -7,31 +7,6 @@ from typing import List, Dict
 logger = logging.getLogger(__name__)
 
 
-def generate_brand_ad_channel_map(brand_list: List[str], config: Dict) -> Dict:
-    """
-    This function generates a map of brands to their advertising channels.
-
-    Parameters:
-    brand_list (list): A list of brands.
-    config (dict): A dictionary containing the configuration settings.
-
-    Returns:
-    dict: A dictionary mapping brands to their advertising channels.
-    """
-    logger.info("generating brand ad channel map")
-    brand_ad_channel_map = {}
-    try:
-        for brand in brand_list:
-            brand_ad_channel_map[brand] = config["brands"][brand]["advertising"][
-                "channels"
-            ]
-    except KeyError as e:
-        print(f"KeyError: {e}")
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-    return brand_ad_channel_map
-
-
 def assign_weights(items: List[str], prior_weights: List[float]) -> Dict:
     """
     This function is used to randomize media channel preferences for each agent.
