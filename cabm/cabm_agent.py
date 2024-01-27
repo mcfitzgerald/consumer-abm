@@ -50,9 +50,7 @@ class ConsumerAgent(mesa.Agent):
         self.household_size = np.random.choice(
             self.config.household_sizes, p=self.config.household_size_distribution
         )
-        self.consumption_rate = abs(
-            np.random.normal(self.config.base_consumption_rate, 1)
-        )
+        self.consumption_rate = sample_normal_min(self.config.base_consumption_rate)
 
     def initialize_brand_preference(self):
         self.brand_preference = np.random.choice(
@@ -60,7 +58,7 @@ class ConsumerAgent(mesa.Agent):
             p=list(self.config.brand_market_share.values()),
         )
         self.loyalty_rate = sample_beta_min(
-            self.config.loyalty_alpha, self.config.loyalty_beta
+            self.config.loyalty_alpha, self.config.loyalty_beta, override=0.95
         )
         self.purchase_probabilities = {
             brand: self.loyalty_rate
@@ -72,7 +70,9 @@ class ConsumerAgent(mesa.Agent):
     def initialize_ad_preferences(self):
         self.enable_ads = self.model.enable_ads
         # CRITICAL - AD STATISTICAL CONTROL TO AD DECAY
-        self.ad_decay_factor = sample_normal_min(self.config.ad_decay_factor)
+        self.ad_decay_factor = sample_normal_min(
+            self.config.ad_decay_factor, override=2
+        )
         self.ad_channel_preference = assign_weights(
             list(self.config.channel_priors.keys()),
             list(self.config.channel_priors.values()),
@@ -218,14 +218,15 @@ class ConsumerModel(mesa.Model):
     """A model with some number of agents."""
 
     def __init__(self, N, config_file, enable_ads=True):
+        # Load CABM configuration
+        config = toml.load(config_file)
+        self.config = Configuration(config)
+
         self.num_agents = N
         self.schedule = mesa.time.RandomActivation(self)
         self.week_number = 1  # Add week_number attribute
         self.enable_ads = enable_ads
-
-        # Load CABM configuration
-        config = toml.load(config_file)
-        self.config = Configuration(config)
+        self.brand_list = self.config.brand_list
 
         # Create agents
         for i in range(self.num_agents):
@@ -240,31 +241,24 @@ class ConsumerModel(mesa.Model):
             },
             agent_reporters={
                 "Household_Size": "household_size",
-                "Purchased_This_Step": "purchased_this_step",
-                "Pantry_Stock": "pantry_stock",
-                "Pantry_Max": "pantry_max",
-                "Pantry_Min": "pantry_min",
-                "Purchase_Behavior": "purchase_behavior",
-                "Minimum_Purchase_Needed": "step_min",
-                "Current_Product_Price": "current_price",
-                "Last_Product_Price": "last_product_price",
+                "Consumption_Rate": "consumption_rate",
                 "Brand_Preference": "brand_preference",
-                "Ad_Exposure": "ad_exposure",
-                "Household_Sizes": "household_sizes",
-                "Household_Size_Distribution": "household_size_distribution",
-                "Base_Consumption_Rate": "base_consumption_rate",
-                "Pantry_Min_Percent": "pantry_min_percent",
-                "Brand_List": "brand_list",
-                "Brand_Market_Share": "brand_market_share",
+                "Loyalty_Rate": "loyalty_rate",
+                "Purchase_Probabilities": "purchase_probabilities",
+                "Enable_Ads": "enable_ads",
                 "Ad_Decay_Factor": "ad_decay_factor",
-                "Joint_Calendar": "joint_calendar",
-                "Brand_Channel_Map": "brand_channel_map",
-                "Loyalty_Alpha": "loyalty_alpha",
-                "Loyalty_Beta": "loyalty_beta",
-                "Sensitivity_Alpha": "sensitivity_alpha",
-                "Sensitivity_Beta": "sensitivity_beta",
-                "Channel_Set": "channel_set",
-                "Channel_Priors": "channel_priors",
+                "Ad_Channel_Preference": "ad_channel_preference",
+                "Adstock": "adstock",
+                "Ad_Sensitivity": "ad_sensitivity",
+                "Pantry_Min": "pantry_min",
+                "Pantry_Max": "pantry_max",
+                "Pantry_Stock": "pantry_stock",
+                "Purchased_This_Step": "purchased_this_step",
+                "Current_Price": "current_price",
+                "Last_Product_Price": "last_product_price",
+                "Purchase_Behavior": "purchase_behavior",
+                "Step_Min": "step_min",
+                "Step_Max": "step_max",
             },
         )
 
