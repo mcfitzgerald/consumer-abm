@@ -1,1 +1,1 @@
-Fix ad decay factor assignment - should not go below 1
+

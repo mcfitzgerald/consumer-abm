@@ -6,7 +6,19 @@ import numpy as np
 # General Helper Functions
 
 
-# A BETA SAMPLER THAT AVOIDS SMALL VALUES
+def sample_normal_min(mean, std_dev=1.0, min_value=1.0, override=None):
+    """Sample from a normal distribution, rejecting values less than min_value.
+    If override is specified, return only that value."""
+    if override is not None:
+        warnings.warn("Normal Sampler Override is in effect.")
+        return override
+    sample = np.random.normal(mean, std_dev)
+    while sample < min_value:
+        sample = np.random.normal(mean, std_dev)
+    return sample
+
+
+# A BETA SAMPLER THAT AVOIDS VALUES BELOW A SET MINIMUM
 def sample_beta_min(alpha, beta, min_value=0.05, override=None):
     """Sample from a beta distribution, rejecting values less than min_value.
     If override is specified, return only that value."""

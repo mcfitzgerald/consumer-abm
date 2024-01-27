@@ -12,6 +12,7 @@ from .cabm_helpers.ad_helpers import (
     ad_decay,
 )
 from .cabm_helpers.agent_and_model_functions import (
+    sample_normal_min,
     sample_beta_min,
     get_pantry_max,
     get_current_price,
@@ -71,7 +72,7 @@ class ConsumerAgent(mesa.Agent):
     def initialize_ad_preferences(self):
         self.enable_ads = self.model.enable_ads
         # CRITICAL - AD STATISTICAL CONTROL TO AD DECAY
-        self.ad_decay_factor = self.config.ad_decay_factor
+        self.ad_decay_factor = sample_normal_min(self.config.ad_decay_factor)
         self.ad_channel_preference = assign_weights(
             list(self.config.channel_priors.keys()),
             list(self.config.channel_priors.values()),
