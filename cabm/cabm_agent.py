@@ -3,15 +3,15 @@ import mesa
 import toml
 import logging
 import numpy as np
-from cabm_helpers.config_helpers import Configuration
-from cabm_helpers.ad_helpers import (
+from .cabm_helpers.config_helpers import Configuration
+from .cabm_helpers.ad_helpers import (
     assign_weights,
     calculate_adstock,
     update_adstock,
     get_purchase_probabilities,
     ad_decay,
 )
-from cabm_helpers.agent_and_model_functions import (
+from .cabm_helpers.agent_and_model_functions import (
     sample_beta_min,
     get_pantry_max,
     get_current_price,
@@ -29,10 +29,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 logger.info("CABM RUNTIME STARTED")
-
-
-# Load CABM configuration
-config = toml.load("config.toml")
 
 
 # Instantiate agents
@@ -59,7 +55,8 @@ class ConsumerAgent(mesa.Agent):
 
     def initialize_brand_preference(self):
         self.brand_preference = np.random.choice(
-            self.config.brand_list, p=self.config.brand_market_share
+            list(self.config.brand_market_share.keys()),
+            p=list(self.config.brand_market_share.values()),
         )
         self.loyalty_rate = sample_beta_min(
             self.config.loyalty_alpha, self.config.loyalty_beta
@@ -73,9 +70,11 @@ class ConsumerAgent(mesa.Agent):
 
     def initialize_ad_preferences(self):
         self.enable_ads = self.model.enable_ads
-        self.ad_decay_factor = abs(np.random.normal(self.config.ad_decay_factor, 1))
+        # CRITICAL - AD STATISTICAL CONTROL TO AD DECAY
+        self.ad_decay_factor = self.config.ad_decay_factor
         self.ad_channel_preference = assign_weights(
-            self.config.channel_set, self.config.channel_priors
+            list(self.config.channel_priors.keys()),
+            list(self.config.channel_priors.values()),
         )
         self.adstock = {i: 0 for i in self.config.brand_list}
         self.ad_sensitivity = sample_beta_min(
@@ -91,12 +90,8 @@ class ConsumerAgent(mesa.Agent):
         self.purchased_this_step = {brand: 0 for brand in self.config.brand_list}
 
     def initialize_prices(self):
-        self.current_price = self.config["brands"][self.brand_preference][
-            "base_product_price"
-        ]
-        self.last_product_price = self.config["brands"][self.brand_preference][
-            "base_product_price"
-        ]
+        self.current_price = self.config.brand_base_price[self.brand_preference]
+        self.last_product_price = self.config.brand_base_price[self.brand_preference]
         self.purchase_behavior = "buy_minimum"
         self.step_min = (
             0  # fewest number of products needed ot bring stock above pantry min
@@ -221,14 +216,14 @@ class ConsumerAgent(mesa.Agent):
 class ConsumerModel(mesa.Model):
     """A model with some number of agents."""
 
-    def __init__(self, N, enable_ads=True):
+    def __init__(self, N, config_file, enable_ads=True):
         self.num_agents = N
         self.schedule = mesa.time.RandomActivation(self)
         self.week_number = 1  # Add week_number attribute
         self.enable_ads = enable_ads
 
         # Load CABM configuration
-        config = toml.load("config.toml")
+        config = toml.load(config_file)
         self.config = Configuration(config)
 
         # Create agents

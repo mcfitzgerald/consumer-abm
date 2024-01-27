@@ -1,3 +1,1 @@
-Finish moving ad sensitivity declaration to config file
-Are there other inits that can be moved to config?
-Play around with tighter bounds
+Fix ad decay factor assignment - should not go below 1
