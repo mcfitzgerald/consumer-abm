@@ -132,6 +132,7 @@ class ConsumerAgent(mesa.Agent):
             self.adstock = update_adstock(self.adstock, weekly_adstock)
 
             # 4) Generate purchase probabilities
+            breakpoint()
             self.purchase_probabilities = get_purchase_probabilities(
                 self.adstock,
                 self.brand_preference,

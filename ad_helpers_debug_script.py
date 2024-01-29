@@ -1,3 +1,4 @@
+from cabm import cabm_agent
 from cabm.cabm_helpers.config_helpers import Configuration
 from cabm.cabm_helpers.ad_helpers import (
     assign_weights,
