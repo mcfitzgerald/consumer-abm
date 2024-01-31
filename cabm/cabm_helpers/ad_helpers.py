@@ -141,20 +141,35 @@ def get_purchase_probabilities(
         transformed_adstock = np.log1p(adstock_values)
 
         # Normalize the transformed adstock values so they sum to 1
-        normalized_adstock = transformed_adstock / np.sum(transformed_adstock)
+        sum_transformed_adstock = np.sum(transformed_adstock)
+        if sum_transformed_adstock == 0:
+            # If the sum is zero, set normalized_adstock to a default value
+            normalized_adstock = np.zeros_like(transformed_adstock)
+        else:
+            normalized_adstock = transformed_adstock / sum_transformed_adstock
 
-        # Calculate the base probabilities as a weighted average of the loyalty rate and the normalized adstock values
-        base_probabilities = (
-            1 - sensitivity
-        ) * loyalty_rate + sensitivity * normalized_adstock
+        # Initialize base probabilities with equal chance for non-preferred brands
+        base_probabilities = np.full_like(
+            normalized_adstock, (1 - loyalty_rate) / (len(brands) - 1)
+        )
+        preferred_brand_index = brands.index(preferred_brand)
+        base_probabilities[preferred_brand_index] = loyalty_rate
 
-        # Ensure no brand gets a purchase probability of zero by setting a minimum probability
-        base_probabilities = np.maximum(base_probabilities, 0.01)
+        # Adjust probabilities based on adstock and sensitivity
+        adjusted_probabilities = base_probabilities * (
+            1 + sensitivity * normalized_adstock
+        )
 
-        # Normalize the base probabilities so they sum to 1
-        probabilities = base_probabilities / np.sum(base_probabilities)
+        # Normalize the adjusted probabilities so they sum to 1
+        probabilities = adjusted_probabilities / np.sum(adjusted_probabilities)
 
         return dict(zip(brands, probabilities))
+    except ZeroDivisionError:
+        print("Error: Division by zero.")
+    except KeyError as e:
+        print(f"KeyError: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
     except ZeroDivisionError:
         print("Error: Division by zero.")
