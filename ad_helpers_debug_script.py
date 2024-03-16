@@ -5,8 +5,9 @@ from cabm.cabm_helpers.ad_helpers import (
     calculate_adstock,
     ad_decay,
     update_adstock,
-    get_purchase_probabilities,
+    #get_purchase_probabilities,
 )
+from cabm.cabm_helpers.purch_prob import get_purchase_probabilities
 import toml
 
 # Load the configuration from the TOML file
@@ -41,9 +42,9 @@ updated_adstock = update_adstock(adstock, decayed_adstock)
 print(f"updated_adstock: {updated_adstock}")
 
 # Test get_purchase_probabilities function
-preferred_brand = "Brand A"
-loyalty_rate = 0.5
-sensitivity = 0.5
+preferred_brand = "A"
+loyalty_rate = 0.95 
+sensitivity = 0.8
 purchase_probabilities = get_purchase_probabilities(
     updated_adstock, preferred_brand, loyalty_rate, sensitivity
 )

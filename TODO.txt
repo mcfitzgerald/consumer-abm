@@ -1,1 +1,1 @@
-
+2-15-23 :: handle exception where ad dict is empty; could be made into the ads off toggle too

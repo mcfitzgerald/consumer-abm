@@ -61,9 +61,11 @@ class ConsumerAgent(mesa.Agent):
             self.config.loyalty_alpha, self.config.loyalty_beta, override=0.95
         )
         self.purchase_probabilities = {
-            brand: self.loyalty_rate
-            if brand == self.brand_preference
-            else (1 - self.loyalty_rate) / (len(self.config.brand_list) - 1)
+            brand: (
+                self.loyalty_rate
+                if brand == self.brand_preference
+                else (1 - self.loyalty_rate) / (len(self.config.brand_list) - 1)
+            )
             for brand in self.config.brand_list
         }
 
@@ -119,6 +121,7 @@ class ConsumerAgent(mesa.Agent):
         try:
             # 1) Decay current self.adstock
             self.adstock = ad_decay(self.adstock, self.ad_decay_factor)
+            breakpoint()
 
             # 2) Calculate this week's adstock
             weekly_adstock = calculate_adstock(
@@ -132,7 +135,7 @@ class ConsumerAgent(mesa.Agent):
             self.adstock = update_adstock(self.adstock, weekly_adstock)
 
             # 4) Generate purchase probabilities
-            breakpoint()
+            # breakpoint()
             self.purchase_probabilities = get_purchase_probabilities(
                 self.adstock,
                 self.brand_preference,
