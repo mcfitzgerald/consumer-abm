@@ -63,7 +63,7 @@ promo_calendar = ["quick_lag", "holiday_season"]
 budget = 48000.0
 channels = ["TV", "Web"]
 priority = {TV = 30, Web = 70}
-ad_campaigns = {TV = "quick_lag", Web = "back_to_school"}
+ad_campaigns = {TV = "quick_lag_2", Web = "back_to_school"}
 
 # You can add additional brands here
 
@@ -80,3 +80,4 @@ halloween = [44]
 cyber_monday = [48] 
 # You can add custom campaigns here
 quick_lag = [3,4,5]
+quick_lag_2 = [5,6,7]

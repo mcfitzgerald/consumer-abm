@@ -58,7 +58,7 @@ class ConsumerAgent(mesa.Agent):
             p=list(self.config.brand_market_share.values()),
         )
         self.loyalty_rate = sample_beta_min(
-            self.config.loyalty_alpha, self.config.loyalty_beta, override=0.95
+            self.config.loyalty_alpha, self.config.loyalty_beta, override=0.99
         )
         self.purchase_probabilities = {
             brand: (
@@ -120,8 +120,10 @@ class ConsumerAgent(mesa.Agent):
         """
         try:
             # 1) Decay current self.adstock
+            # print(f"TRACE FOR WEEK = {self.model.week_number}")
+            # print(f"step 0 - current adstock: {self.adstock}")
             self.adstock = ad_decay(self.adstock, self.ad_decay_factor)
-            breakpoint()
+            # print(f"step 1 - decayed adstock: {self.adstock}")
 
             # 2) Calculate this week's adstock
             weekly_adstock = calculate_adstock(
@@ -130,9 +132,11 @@ class ConsumerAgent(mesa.Agent):
                 self.config.brand_channel_map,
                 self.ad_channel_preference,
             )
+            # print(f"step 2 - new adstock this week: {weekly_adstock}")
 
             # 3) Update self.adstock
             self.adstock = update_adstock(self.adstock, weekly_adstock)
+            # print(f"step 3 - updated adstock: {self.adstock}")
 
             # 4) Generate purchase probabilities
             # breakpoint()
