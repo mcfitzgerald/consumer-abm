@@ -180,7 +180,6 @@ class ConsumerAgent(mesa.Agent):
         Depending on the purchase behavior, it updates the purchase count and the pantry stock.
         """
         try:
-            print(f"Purchasing with probabilities: {self.purchase_probabilities}")
             self.purchased_this_step = {
                 brand: 0 for brand in self.config.brand_list
             }  # Reset purchase count

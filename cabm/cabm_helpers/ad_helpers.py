@@ -159,19 +159,19 @@ def get_purchase_probabilities(
         else:
             normalized_adstock = transformed_adstock / sum_transformed_adstock
 
-        # print(f"normalized adstock: {normalized_adstock}")
+        print(f"normalized adstock: {normalized_adstock}")
 
         # Initialize base probabilities with equal chance for non-preferred brands
         base_probabilities = np.full_like(
             normalized_adstock, (1 - loyalty_rate) / (len(brands) - 1)
         )
 
-        # print(f"first pass base probabilities: {base_probabilities}")
+        print(f"first pass base probabilities: {base_probabilities}")
 
         preferred_brand_index = brands.index(preferred_brand)
         base_probabilities[preferred_brand_index] = loyalty_rate
 
-        # print(f"second pass base probabilities: {base_probabilities}")
+        print(f"second pass base probabilities: {base_probabilities}")
 
         # Adjust probabilities based on adstock and sensitivity
         # adjusted_probabilities = base_probabilities * (
@@ -180,12 +180,12 @@ def get_purchase_probabilities(
         # # print("Updating purch probs by multiplying base prob times adstock probs")
         adjusted_probabilities = normalized_adstock * base_probabilities
 
-        # print(f"unnormalized adjusted probabilities: {adjusted_probabilities}")
+        print(f"unnormalized adjusted probabilities: {adjusted_probabilities}")
 
         # Normalize the adjusted probabilities so they sum to 1
         probabilities = adjusted_probabilities / np.sum(adjusted_probabilities)
 
-        # print(f"normalized probabilities: {probabilities}")
+        print(f"normalized probabilities: {probabilities}")
 
         return dict(zip(brands, probabilities))
     except ZeroDivisionError:
