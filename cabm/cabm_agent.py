@@ -1,7 +1,6 @@
 import math
 import mesa
 import toml
-import logging
 import numpy as np
 from .cabm_helpers.config_helpers import Configuration
 from .cabm_helpers.ad_helpers import (
@@ -19,17 +18,6 @@ from .cabm_helpers.agent_and_model_functions import (
     compute_total_purchases,
     compute_average_price,
 )
-
-# Logger config and initializations
-file_handler = logging.FileHandler("cabm.log")
-file_handler.setLevel(logging.DEBUG)
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s",
-    handlers=[file_handler],
-)
-logger = logging.getLogger(__name__)
-logger.info("CABM RUNTIME STARTED")
 
 
 # Instantiate agents
@@ -71,7 +59,6 @@ class ConsumerAgent(mesa.Agent):
 
     def initialize_ad_preferences(self):
         self.enable_ads = self.model.enable_ads
-        # CRITICAL - AD STATISTICAL CONTROL TO AD DECAY
         self.ad_decay_factor = sample_normal_min(
             self.config.ad_decay_factor, override=2
         )
@@ -166,6 +153,12 @@ class ConsumerAgent(mesa.Agent):
                 self.brand_preference,
             )
             price_dropped = self.current_price < self.last_product_price
+
+            # Choose brand to purchase based on purchase probabilities
+            brands = list(self.purchase_probabilities.keys())
+            probabilities = list(self.purchase_probabilities.values())
+            self.brand_preference = np.random.choice(brands, p=probabilities)
+
             if self.pantry_stock <= self.pantry_min:
                 self.purchase_behavior = (
                     "buy_maximum" if price_dropped else "buy_minimum"
@@ -187,6 +180,7 @@ class ConsumerAgent(mesa.Agent):
         Depending on the purchase behavior, it updates the purchase count and the pantry stock.
         """
         try:
+            print(f"Purchasing with probabilities: {self.purchase_probabilities}")
             self.purchased_this_step = {
                 brand: 0 for brand in self.config.brand_list
             }  # Reset purchase count
@@ -226,6 +220,8 @@ class ConsumerModel(mesa.Model):
     """A model with some number of agents."""
 
     def __init__(self, N, config_file, enable_ads=True):
+        # Initialize base class -- new requirement
+        super().__init__()
         # Load CABM configuration
         config = toml.load(config_file)
         self.config = Configuration(config)

@@ -77,7 +77,8 @@ def calculate_adstock(
 
 def ad_decay(adstock: Dict, factor: float) -> Dict:
     """
-    This function applies a decay factor to the adstock of each brand.
+    This function applies a decay factor to the adstock of each brand. If the resulting adstock is less than 1,
+    it is set to 0.
 
     Parameters:
     adstock (dict): A dictionary mapping brands to their adstock.
@@ -87,16 +88,19 @@ def ad_decay(adstock: Dict, factor: float) -> Dict:
     dict: A dictionary mapping brands to their decayed adstock.
     """
     try:
-        return {brand: value / factor for brand, value in adstock.items()}
+        return {
+            brand: (value / factor) if (value / factor) > 1 else 0
+            for brand, value in adstock.items()
+        }
     except RuntimeError:
         logger.error(f"current adstock: {adstock}")
-        logger.error(f"current adstock: {factor}")
+        logger.error(f"current factor: {factor}")
     except ZeroDivisionError:
         print("Error: Decay factor cannot be zero.")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
         logger.error(f"current adstock: {adstock}")
-        logger.error(f"current adstock: {factor}")
+        logger.error(f"current factor: {factor}")
 
 
 def update_adstock(adstock1: Dict, adstock2: Dict) -> Dict:
