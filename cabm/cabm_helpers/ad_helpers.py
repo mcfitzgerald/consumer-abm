@@ -1,11 +1,8 @@
 import random
-import logging
 import warnings
 import numpy as np
 import pandas as pd
 from typing import List, Dict
-
-logger = logging.getLogger(__name__)
 
 
 def assign_weights(items: List[str], prior_weights: List[float]) -> Dict:
@@ -78,7 +75,7 @@ def calculate_adstock(
 def ad_decay(adstock: Dict, factor: float) -> Dict:
     """
     This function applies a decay factor to the adstock of each brand. If the resulting adstock is less than 1,
-    it is set to 0.
+    it is set to 1.
 
     Parameters:
     adstock (dict): A dictionary mapping brands to their adstock.
@@ -89,18 +86,17 @@ def ad_decay(adstock: Dict, factor: float) -> Dict:
     """
     try:
         return {
-            brand: (value / factor) if (value / factor) > 1 else 0
+            brand: (value / factor) if (value / factor) > 1 else 1
             for brand, value in adstock.items()
         }
     except RuntimeError:
-        logger.error(f"current adstock: {adstock}")
-        logger.error(f"current factor: {factor}")
+        print(f"RuntimeError: current adstock: {adstock}, current factor: {factor}")
     except ZeroDivisionError:
         print("Error: Decay factor cannot be zero.")
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-        logger.error(f"current adstock: {adstock}")
-        logger.error(f"current factor: {factor}")
+        print(
+            f"An unexpected error occurred: {e}, current adstock: {adstock}, current factor: {factor}"
+        )
 
 
 def update_adstock(adstock1: Dict, adstock2: Dict) -> Dict:
@@ -194,66 +190,3 @@ def get_purchase_probabilities(
         print(f"KeyError: {e}")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-
-
-# def get_purchase_probabilities(
-#     adstock: Dict, preferred_brand: str, loyalty_rate: float, sensitivity: float
-# ) -> Dict:
-#     """
-#     This function calculates the probability of purchasing each brand.
-
-#     Parameters:
-#     adstock (dict): A dictionary mapping brands to their adstock.
-#     preferred_brand (str): The preferred brand.
-#     loyalty_rate (float): The loyalty rate.
-#     sensitivity (float): The sensitivity of the probabilities to the adstock values.
-
-#     Returns:
-#     dict: A dictionary mapping brands to their purchase probabilities.
-#     """
-#     try:
-#         brands = list(adstock.keys())
-#         adstock_values = np.array(list(adstock.values()))
-
-#         # Transform adstock values using a logarithm to reduce the impact of large differences
-#         # transformed_adstock = np.log1p(adstock_values)
-#         warnings.warn("ADSTOCK TRANSFORMATION DISABLED")
-#         transformed_adstock = adstock_values
-
-#         # Normalize the transformed adstock values so they sum to 1
-#         sum_transformed_adstock = np.sum(transformed_adstock)
-#         if sum_transformed_adstock == 0:
-#             # If the sum is zero, set normalized_adstock to a default value
-#             normalized_adstock = np.zeros_like(transformed_adstock)
-#         else:
-#             normalized_adstock = transformed_adstock / sum_transformed_adstock
-
-#         # Initialize base probabilities with equal chance for non-preferred brands
-#         base_probabilities = np.full_like(
-#             normalized_adstock, (1 - loyalty_rate) / (len(brands) - 1)
-#         )
-#         preferred_brand_index = brands.index(preferred_brand)
-#         base_probabilities[preferred_brand_index] = loyalty_rate
-
-#         # Adjust probabilities based on adstock and sensitivity
-#         adjusted_probabilities = base_probabilities * (
-#             1 + sensitivity * normalized_adstock
-#         )
-
-#         # Normalize the adjusted probabilities so they sum to 1
-#         probabilities = adjusted_probabilities / np.sum(adjusted_probabilities)
-
-#         return dict(zip(brands, probabilities))
-#     except ZeroDivisionError:
-#         print("Error: Division by zero.")
-#     except KeyError as e:
-#         print(f"KeyError: {e}")
-#     except Exception as e:
-#         print(f"An unexpected error occurred: {e}")
-
-#     except ZeroDivisionError:
-#         print("Error: Division by zero.")
-#     except KeyError as e:
-#         print(f"KeyError: {e}")
-#     except Exception as e:
-#         print(f"An unexpected error occurred: {e}")

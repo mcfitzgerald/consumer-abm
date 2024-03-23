@@ -56,6 +56,8 @@ class ConsumerAgent(mesa.Agent):
             )
             for brand in self.config.brand_list
         }
+        # Adding a purchase choice in addition to preference so that preference remains but choice can change
+        self.purchase_choice = self.brand_preference
 
     def initialize_ad_preferences(self):
         self.enable_ads = self.model.enable_ads
@@ -136,7 +138,7 @@ class ConsumerAgent(mesa.Agent):
             # 5) Update preferred brand based purchase probabilities
             brands = list(self.purchase_probabilities.keys())
             probabilities = list(self.purchase_probabilities.values())
-            self.brand_preference = np.random.choice(brands, p=probabilities)
+            self.brand_choice = np.random.choice(brands, p=probabilities)
 
         except ZeroDivisionError:
             print("Error: Division by zero in ad_exposure.")
@@ -150,14 +152,9 @@ class ConsumerAgent(mesa.Agent):
             self.current_price = get_current_price(
                 self.model.week_number,
                 self.config.joint_calendar,
-                self.brand_preference,
+                self.brand_choice,
             )
             price_dropped = self.current_price < self.last_product_price
-
-            # Choose brand to purchase based on purchase probabilities
-            brands = list(self.purchase_probabilities.keys())
-            probabilities = list(self.purchase_probabilities.values())
-            self.brand_preference = np.random.choice(brands, p=probabilities)
 
             if self.pantry_stock <= self.pantry_min:
                 self.purchase_behavior = (
@@ -192,16 +189,16 @@ class ConsumerAgent(mesa.Agent):
             self.step_max = math.floor(self.pantry_max - self.pantry_stock)
             # Update purchase count based on purchase behavior
             if self.purchase_behavior == "buy_minimum":
-                self.purchased_this_step[self.brand_preference] += self.step_min
+                self.purchased_this_step[self.brand_choice] += self.step_min
             elif self.purchase_behavior == "buy_maximum":
-                self.purchased_this_step[self.brand_preference] += self.step_max
+                self.purchased_this_step[self.brand_choice] += self.step_max
             elif self.purchase_behavior == "buy_some_or_none":
                 # Include 0 as a possible purchase even if pantry not full
-                self.purchased_this_step[self.brand_preference] += np.random.choice(
+                self.purchased_this_step[self.brand_choice] += np.random.choice(
                     list(range(0, (self.step_max + 1)))
                 )
             elif self.purchase_behavior == "buy_none":
-                self.purchased_this_step[self.brand_preference] += 0  # No purchase
+                self.purchased_this_step[self.brand_choice] += 0  # No purchase
             # Update pantry stock
             self.pantry_stock += sum(self.purchased_this_step.values())
         except Exception as e:
