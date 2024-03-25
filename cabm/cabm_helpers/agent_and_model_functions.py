@@ -31,6 +31,38 @@ def sample_beta_min(alpha, beta, min_value=0.05, override=None):
     return sample
 
 
+# Customized softmax for ad response and price point response
+def magnitude_adjusted_softmax(x: np.ndarray) -> np.ndarray:
+    """Compute softmax values for each set of scores in x, with adjustments for magnitude."""
+    try:
+        # Handle the case where x is a list of zeros
+        if np.all(x == 0):
+            return np.full(x.shape, 1.0 / x.size)
+
+        # Set temperature relative to max value if not overidden
+        # Note this is critical to do before overflow prevention step -- need to test if it changes before log
+        temperature = max(1, np.floor(np.log(np.max(x))))
+        logging.debug(f"temperature = {temperature}")
+
+        # Apply log transformation
+        x = np.log1p(x)
+        logging.debug(f"log transformed = {x}")
+
+        # Subtract the max value to prevent overflow
+        x = x - np.max(x)
+        logging.debug(f"overflow transform = {x}")
+
+        e_x = np.exp(x / temperature)
+        logging.debug(f"e_x = {e_x}")
+        return e_x / np.sum(e_x)
+    except ZeroDivisionError:
+        print("Error: Division by zero in softmax.")
+    except TypeError:
+        print("Error: Input should be a numpy array.")
+    except Exception as e:
+        print(f"An unexpected error occurred in softmax: {e}")
+
+
 # Household setup functions
 
 

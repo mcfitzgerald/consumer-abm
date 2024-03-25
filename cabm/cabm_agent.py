@@ -1,6 +1,8 @@
 import math
 import mesa
 import toml
+import datetime
+import logging
 import numpy as np
 from .cabm_helpers.config_helpers import Configuration
 from .cabm_helpers.ad_helpers import (
@@ -18,6 +20,16 @@ from .cabm_helpers.agent_and_model_functions import (
     compute_total_purchases,
     compute_average_price,
 )
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+
+logfile = datetime.datetime.now().strftime("log_%m%d%y%H%M%p.log")
+
+file_handler = logging.FileHandler(logfile)
+file_handler_format = "%(asctime)s | %(levelname)s | %(lineno)d: %(message)s"
+file_handler.setFormatter(logging.Formatter(file_handler_format))
+logger.addHandler(file_handler)
 
 
 # Instantiate agents
@@ -109,10 +121,7 @@ class ConsumerAgent(mesa.Agent):
         """
         try:
             # 1) Decay current self.adstock
-            # print(f"TRACE FOR WEEK = {self.model.week_number}")
-            # print(f"step 0 - current adstock: {self.adstock}")
             self.adstock = ad_decay(self.adstock, self.ad_decay_factor)
-            # print(f"step 1 - decayed adstock: {self.adstock}")
 
             # 2) Calculate this week's adstock
             weekly_adstock = calculate_adstock(
@@ -121,14 +130,13 @@ class ConsumerAgent(mesa.Agent):
                 self.config.brand_channel_map,
                 self.ad_channel_preference,
             )
-            # print(f"step 2 - new adstock this week: {weekly_adstock}")
 
             # 3) Update self.adstock
             self.adstock = update_adstock(self.adstock, weekly_adstock)
-            # print(f"step 3 - updated adstock: {self.adstock}")
 
             # 4) Generate purchase probabilities
-            # breakpoint()
+            logging.debug("*** NEXT AGENT OR STEP ***")
+            logging.debug(f"Agent ID: {self.unique_id}, Step: {self.model.week_number}")
             self.purchase_probabilities = get_purchase_probabilities(
                 self.adstock,
                 self.brand_preference,
@@ -139,6 +147,9 @@ class ConsumerAgent(mesa.Agent):
             brands = list(self.purchase_probabilities.keys())
             probabilities = list(self.purchase_probabilities.values())
             self.brand_choice = np.random.choice(brands, p=probabilities)
+
+            logging.debug(f"Purchase probabilities: {self.purchase_probabilities}")
+            logging.debug(f"Brand choice: {self.brand_choice}")
 
         except ZeroDivisionError:
             print("Error: Division by zero in ad_exposure.")
@@ -243,6 +254,7 @@ class ConsumerModel(mesa.Model):
                 "Household_Size": "household_size",
                 "Consumption_Rate": "consumption_rate",
                 "Brand_Preference": "brand_preference",
+                "Brand_Choice": "brand_choice",
                 "Loyalty_Rate": "loyalty_rate",
                 "Purchase_Probabilities": "purchase_probabilities",
                 "Enable_Ads": "enable_ads",
