@@ -9,7 +9,7 @@ from .cabm_helpers.ad_helpers import (
     assign_weights,
     calculate_adstock,
     update_adstock,
-    get_purchase_probabilities,
+    get_ad_impact_on_purchase_probabilities,
     ad_decay,
 )
 from .cabm_helpers.agent_and_model_functions import (
@@ -27,7 +27,9 @@ logger.setLevel(logging.DEBUG)
 logfile = datetime.datetime.now().strftime("log_%m%d%y%H%M%p.log")
 
 file_handler = logging.FileHandler(logfile)
-file_handler_format = "%(asctime)s | %(levelname)s | %(lineno)d: %(message)s"
+file_handler_format = (
+    "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(levelname)s: %(message)s"
+)
 file_handler.setFormatter(logging.Formatter(file_handler_format))
 logger.addHandler(file_handler)
 
@@ -94,8 +96,8 @@ class ConsumerAgent(mesa.Agent):
         self.purchased_this_step = {brand: 0 for brand in self.config.brand_list}
 
     def initialize_prices(self):
-        self.current_price = self.config.brand_base_price[self.brand_preference]
-        self.last_product_price = self.config.brand_base_price[self.brand_preference]
+        self.current_price = self.config.brand_base_price[self.brand_choice]
+        self.last_product_price = self.config.brand_base_price[self.brand_choice]
         self.purchase_behavior = "buy_minimum"
         self.step_min = (
             0  # fewest number of products needed ot bring stock above pantry min
@@ -137,19 +139,12 @@ class ConsumerAgent(mesa.Agent):
             # 4) Generate purchase probabilities
             logging.debug("*** NEXT AGENT OR STEP ***")
             logging.debug(f"Agent ID: {self.unique_id}, Step: {self.model.week_number}")
-            self.purchase_probabilities = get_purchase_probabilities(
+            self.purchase_probabilities = get_ad_impact_on_purchase_probabilities(
                 self.adstock,
                 self.brand_preference,
                 self.loyalty_rate,
                 self.ad_sensitivity,
             )
-            # 5) Update preferred brand based purchase probabilities
-            brands = list(self.purchase_probabilities.keys())
-            probabilities = list(self.purchase_probabilities.values())
-            self.brand_choice = np.random.choice(brands, p=probabilities)
-
-            logging.debug(f"Purchase probabilities: {self.purchase_probabilities}")
-            logging.debug(f"Brand choice: {self.brand_choice}")
 
         except ZeroDivisionError:
             print("Error: Division by zero in ad_exposure.")
@@ -157,6 +152,33 @@ class ConsumerAgent(mesa.Agent):
             print(f"KeyError occurred: {e}")
         except Exception as e:
             print(f"An unexpected error occurred in ad_exposure: {e}")
+
+    def get_product_prices(self):
+        """
+        This function returns the prices for all products for a given week.
+        """
+        try:
+            week_number = self.model.week_number
+            joint_calendar = self.config.joint_calendar
+            product_prices = {}
+
+            for brand in joint_calendar.columns:
+                product_prices[brand] = joint_calendar.loc[week_number, brand]
+
+            return product_prices
+        except KeyError as e:
+            print(f"KeyError occurred: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred in get_product_prices: {e}")
+
+    def set_brand_choice(self):
+        """Update brand based purchase probabilities"""
+        brands = list(self.purchase_probabilities.keys())
+        probabilities = list(self.purchase_probabilities.values())
+        self.brand_choice = np.random.choice(brands, p=probabilities)
+
+        logging.debug(f"Purchase probabilities: {self.purchase_probabilities}")
+        logging.debug(f"Brand choice: {self.brand_choice}")
 
     def set_purchase_behavior(self):
         try:

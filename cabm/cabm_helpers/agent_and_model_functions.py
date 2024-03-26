@@ -1,5 +1,6 @@
 import math
 import warnings
+import logging
 import numpy as np
 
 
@@ -32,7 +33,7 @@ def sample_beta_min(alpha, beta, min_value=0.05, override=None):
 
 
 # Customized softmax for ad response and price point response
-def magnitude_adjusted_softmax(x: np.ndarray) -> np.ndarray:
+def magnitude_adjusted_softmax(x: np.ndarray, inverse=False) -> np.ndarray:
     """Compute softmax values for each set of scores in x, with adjustments for magnitude."""
     try:
         # Handle the case where x is a list of zeros
@@ -49,7 +50,10 @@ def magnitude_adjusted_softmax(x: np.ndarray) -> np.ndarray:
         logging.debug(f"log transformed = {x}")
 
         # Subtract the max value to prevent overflow
-        x = x - np.max(x)
+        if inverse:
+            x = np.max(x) - x
+        else:
+            x = x - np.max(x)
         logging.debug(f"overflow transform = {x}")
 
         e_x = np.exp(x / temperature)

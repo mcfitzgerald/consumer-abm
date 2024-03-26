@@ -1,5 +1,6 @@
 import random
 import warnings
+import logging
 import numpy as np
 import pandas as pd
 from typing import List, Dict
@@ -123,11 +124,10 @@ def update_adstock(adstock1: Dict, adstock2: Dict) -> Dict:
     return updated_adstock
 
 
-def get_purchase_probabilities(
+def get_ad_impact_on_purchase_probabilities(
     adstock: Dict,
     brand_preference: str,
     loyalty_rate: float,
-    ad_sensitivity: float,
 ) -> Dict:
     """
     This function calculates the probability of purchasing each brand.
@@ -142,6 +142,65 @@ def get_purchase_probabilities(
     dict: A dictionary mapping brands to their purchase probabilities.
     """
     warnings.warn("WARNING: YOU ARE USING A MODIFIED PURCH PROB GETTER")
+
+    logging.debug(f"Using adstock: {adstock}")
+
+    try:
+        brands = list(adstock.keys())
+        adstock_values = np.array(list(adstock.values()))
+
+        # Softmax adstock to return normalized probability distribution
+        transformed_adstock = magnitude_adjusted_softmax(adstock_values)
+
+        logging.debug(f"magnitude adjusted softmax adstock: {transformed_adstock}")
+
+        # Initialize base probabilities with equal chance for non-preferred brands
+        base_probabilities = np.full_like(
+            transformed_adstock, (1 - loyalty_rate) / (len(brands) - 1)
+        )
+
+        logging.debug(f"first pass base probabilities: {base_probabilities}")
+
+        brand_preference_index = brands.index(brand_preference)
+        base_probabilities[brand_preference_index] = loyalty_rate
+
+        logging.debug(f"second pass base probabilities: {base_probabilities}")
+
+        adjusted_probabilities = transformed_adstock * base_probabilities
+
+        logging.debug(f"unnormalized adjusted probabilities: {adjusted_probabilities}")
+
+        # Normalize the adjusted probabilities so they sum to 1
+        probabilities = adjusted_probabilities / np.sum(adjusted_probabilities)
+
+        logging.debug(f"normalized probabilities: {probabilities}")
+
+        return dict(zip(brands, probabilities))
+    except ZeroDivisionError:
+        print("Error: Division by zero.")
+    except KeyError as e:
+        print(f"KeyError: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+
+def get_price_impact_on_purchase_probabilities(
+    price_list: Dict,
+    brand_preference: str,
+    loyalty_rate: float,
+) -> Dict:
+    """
+    This function calculates the probability of purchasing each brand.
+
+    Parameters:
+    adstock (dict): A dictionary mapping brands to their price.
+    brand_preference (str): The preferred brand.
+    loyalty_rate (float): The loyalty rate.
+    temperature (float): The sensitivity of the probabilities to the adstock values.
+
+    Returns:
+    dict: A dictionary mapping brands to their purchase probabilities.
+    """
 
     logging.debug(f"Using adstock: {adstock}")
 

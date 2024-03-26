@@ -1,8 +1,8 @@
 import numpy as np
 
 
-def magnitude_adjusted_softmax(x: np.ndarray) -> np.ndarray:
-    """Compute magnitude_adjusted_softmax values for each sets of scores in x."""
+def magnitude_adjusted_softmax(x: np.ndarray, inverse=False) -> np.ndarray:
+    """Compute softmax values for each set of scores in x, with adjustments for magnitude."""
     try:
         # Handle the case where x is a list of zeros
         if np.all(x == 0):
@@ -10,7 +10,7 @@ def magnitude_adjusted_softmax(x: np.ndarray) -> np.ndarray:
 
         # Set temperature relative to max value if not overidden
         # Note this is critical to do before overflow prevention step -- need to test if it changes before log
-        temperature = np.floor(np.log(np.max(x)))
+        temperature = max(1, np.floor(np.log(np.max(x))))
         print(f"temperature = {temperature}")
 
         # Apply log transformation
@@ -18,18 +18,21 @@ def magnitude_adjusted_softmax(x: np.ndarray) -> np.ndarray:
         print(f"log transformed = {x}")
 
         # Subtract the max value to prevent overflow
-        x = x - np.max(x)
+        if inverse:
+            x = np.max(x) - x
+        else:
+            x = x - np.max(x)
         print(f"overflow transform = {x}")
 
         e_x = np.exp(x / temperature)
         print(f"e_x = {e_x}")
         return e_x / np.sum(e_x)
     except ZeroDivisionError:
-        print("Error: Division by zero in magnitude_adjusted_softmax.")
+        print("Error: Division by zero in softmax.")
     except TypeError:
         print("Error: Input should be a numpy array.")
     except Exception as e:
-        print(f"An unexpected error occurred in magnitude_adjusted_softmax: {e}")
+        print(f"An unexpected error occurred in softmax: {e}")
 
 
 # # Testing the magnitude_adjusted_softmax function with different inputs

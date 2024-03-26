@@ -1,2 +1,2 @@
 2-15-24 :: handle exception where ad dict is empty; could be made into the ads off toggle too
-3-23-24 :: right now consumer doesn't weigh pricing between brands, only within brands -- need to change; IDEA - add price point function to purchase probabilities (use log softening)
+3-23-24 :: right now consumer doesn't weigh pricing between brands, only within brands -- need to change; IDEA - add price point function to purchase probabilities (use log softening) 
