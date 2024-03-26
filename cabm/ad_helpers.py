@@ -4,7 +4,7 @@ import logging
 import numpy as np
 import pandas as pd
 from typing import List, Dict
-from cabm.cabm_helpers.agent_and_model_functions import magnitude_adjusted_softmax
+from agent_and_model_functions import magnitude_adjusted_softmax
 
 
 def assign_weights(items: List[str], prior_weights: List[float]) -> Dict:
@@ -196,43 +196,48 @@ def get_price_impact_on_purchase_probabilities(
     adstock (dict): A dictionary mapping brands to their price.
     brand_preference (str): The preferred brand.
     loyalty_rate (float): The loyalty rate.
-    temperature (float): The sensitivity of the probabilities to the adstock values.
 
     Returns:
     dict: A dictionary mapping brands to their purchase probabilities.
     """
 
-    logging.debug(f"Using adstock: {adstock}")
+    logging.debug(f"Using pricelist: {price_list}")
 
     try:
-        brands = list(adstock.keys())
-        adstock_values = np.array(list(adstock.values()))
+        brands = list(price_list.keys())
+        price_list_values = np.array(list(price_list.values()))
 
         # Softmax adstock to return normalized probability distribution
-        transformed_adstock = magnitude_adjusted_softmax(adstock_values)
+        transformed_price_list = magnitude_adjusted_softmax(
+            price_list_values, inverse=True
+        )
 
-        logging.debug(f"magnitude adjusted softmax adstock: {transformed_adstock}")
+        logging.debug(
+            f"Inverse magnitude adjusted softmax price_list: {transformed_price_list}"
+        )
 
         # Initialize base probabilities with equal chance for non-preferred brands
         base_probabilities = np.full_like(
-            transformed_adstock, (1 - loyalty_rate) / (len(brands) - 1)
+            transformed_price_list, (1 - loyalty_rate) / (len(brands) - 1)
         )
 
-        logging.debug(f"first pass base probabilities: {base_probabilities}")
+        logging.debug(f"first pass base pricing probabilities: {base_probabilities}")
 
         brand_preference_index = brands.index(brand_preference)
         base_probabilities[brand_preference_index] = loyalty_rate
 
-        logging.debug(f"second pass base probabilities: {base_probabilities}")
+        logging.debug(f"second pass base pricing probabilities: {base_probabilities}")
 
-        adjusted_probabilities = transformed_adstock * base_probabilities
+        adjusted_probabilities = transformed_price_list * base_probabilities
 
-        logging.debug(f"unnormalized adjusted probabilities: {adjusted_probabilities}")
+        logging.debug(
+            f"unnormalized pricing adjusted probabilities: {adjusted_probabilities}"
+        )
 
         # Normalize the adjusted probabilities so they sum to 1
         probabilities = adjusted_probabilities / np.sum(adjusted_probabilities)
 
-        logging.debug(f"normalized probabilities: {probabilities}")
+        logging.debug(f"normalized pricing probabilities: {probabilities}")
 
         return dict(zip(brands, probabilities))
     except ZeroDivisionError:

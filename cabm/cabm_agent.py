@@ -4,15 +4,15 @@ import toml
 import datetime
 import logging
 import numpy as np
-from .cabm_helpers.config_helpers import Configuration
-from .cabm_helpers.ad_helpers import (
+from config_helpers import Configuration
+from ad_helpers import (
     assign_weights,
     calculate_adstock,
     update_adstock,
     get_ad_impact_on_purchase_probabilities,
     ad_decay,
 )
-from .cabm_helpers.agent_and_model_functions import (
+from agent_and_model_functions import (
     sample_normal_min,
     sample_beta_min,
     get_pantry_max,
@@ -241,6 +241,7 @@ class ConsumerAgent(mesa.Agent):
         self.consume()
         if self.model.enable_ads:
             self.ad_exposure()
+        self.set_brand_choice()
         self.set_purchase_behavior()
         self.purchase()
 
