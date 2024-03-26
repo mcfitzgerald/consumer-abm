@@ -1,10 +1,10 @@
 import pandas as pd
 from typing import Dict, List
-from ad_calendar import (
+from .ad_calendar import (
     prepare_ad_schedule_variables,
     generate_brand_ad_schedule,
 )
-from promo_calendar import (
+from .promo_calendar import (
     prepare_promo_schedule_variables,
     generate_brand_promo_schedule,
 )
