@@ -142,6 +142,7 @@ class ConsumerAgent(mesa.Agent):
         try:
             price_impact_probabilities = get_price_impact_on_purchase_probabilities(
                 self.model.week_number,
+                self.config.brand_list,
                 self.config.joint_calendar,
                 self.brand_preference,
                 self.loyalty_rate,

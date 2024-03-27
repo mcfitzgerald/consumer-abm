@@ -273,6 +273,7 @@ def get_current_price(week, joint_calendar, brand):
 
 def get_price_impact_on_purchase_probabilities(
     week_number,
+    brand_list,
     joint_calendar,
     brand_preference: str,
     loyalty_rate: float,
@@ -295,10 +296,12 @@ def get_price_impact_on_purchase_probabilities(
     price_list = {}
 
     try:
-        for brand in joint_calendar.columns:
-            price_list[brand] = joint_calendar.loc[week_number, brand]
+        for brand in brand_list:
+            price_list[brand] = joint_calendar.loc[week_number, (brand, "price")]
     except Exception as e:
         print(f"Could not generate price list: {e}")
+
+    breakpoint()
 
     logging.debug(f"Using pricelist: {price_list}")
 
