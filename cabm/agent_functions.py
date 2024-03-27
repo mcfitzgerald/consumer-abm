@@ -144,9 +144,6 @@ def calculate_adstock(
             for channel in channels:
                 spend = joint_calendar.loc[week, (brand, channel)]
                 weighted_spend = spend * channel_preference[channel]
-                # print(
-                #     f"adstock calc for week {week} for brand {brand}, channel {channel}: spend = {spend}, weighted spend = {weighted_spend}"
-                # )
                 if brand in adstock:
                     adstock[brand] += weighted_spend
                 else:
@@ -172,7 +169,7 @@ def ad_decay(adstock: Dict, factor: float) -> Dict:
     """
     try:
         return {
-            brand: (value / factor) if (value / factor) > 1 else 1
+            brand: (value / factor) if (value / factor) > 1.0 else 1.0
             for brand, value in adstock.items()
         }
     except RuntimeError:
@@ -282,15 +279,19 @@ def get_price_impact_on_purchase_probabilities(
 ) -> Dict:
     """
     This function calculates the probability of purchasing each brand.
+    Note the there is separate logic for how much of a chosen brand to purchase,
+    this differs by setting probability of switching brands based on price.
 
     Parameters:
-    adstock (dict): A dictionary mapping brands to their price.
+    week_number (int): The week number.
+    joint_calendar (DataFrame): A DataFrame containing the joint calendar.
     brand_preference (str): The preferred brand.
     loyalty_rate (float): The loyalty rate.
 
     Returns:
     dict: A dictionary mapping brands to their purchase probabilities.
     """
+    logging.debug("Entered Price Impact Block")
     price_list = {}
 
     try:

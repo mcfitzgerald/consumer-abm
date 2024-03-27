@@ -10,9 +10,10 @@ from .agent_functions import (
     get_current_price,
     assign_weights,
     calculate_adstock,
+    ad_decay,
     update_adstock,
     get_ad_impact_on_purchase_probabilities,
-    ad_decay,
+    get_price_impact_on_purchase_probabilities,
 )
 
 
@@ -42,7 +43,7 @@ class ConsumerAgent(mesa.Agent):
             p=list(self.config.brand_market_share.values()),
         )
         self.loyalty_rate = sample_beta_min(
-            self.config.loyalty_alpha, self.config.loyalty_beta, override=0.99
+            self.config.loyalty_alpha, self.config.loyalty_beta, override=0.90
         )
         self.purchase_probabilities = {
             brand: (
@@ -132,23 +133,33 @@ class ConsumerAgent(mesa.Agent):
         except Exception as e:
             print(f"An unexpected error occurred in ad_exposure: {e}")
 
-    def get_product_prices(self):
+    def price_exposure(self):
         """
-        This function returns the prices for all products for a given week.
+        This function adjusts the purchase probabilities based on price impact.
+        It first calculates the price impact probabilities, then adjusts the purchase probabilities accordingly.
+        Finally, it normalizes the adjusted purchase probabilities so they sum to 1.
         """
         try:
-            week_number = self.model.week_number
-            joint_calendar = self.config.joint_calendar
-            product_prices = {}
+            price_impact_probabilities = get_price_impact_on_purchase_probabilities(
+                self.model.week_number,
+                self.config.joint_calendar,
+                self.brand_preference,
+                self.loyalty_rate,
+            )
 
-            for brand in joint_calendar.columns:
-                product_prices[brand] = joint_calendar.loc[week_number, brand]
+            adjusted_purchase_probabilities = (
+                price_impact_probabilities * self.purchase_probabilities
+            )
 
-            return product_prices
+            self.purchase_probabilities = adjusted_purchase_probabilities / np.sum(
+                adjusted_purchase_probabilities
+            )
+        except ZeroDivisionError:
+            print("Error: Division by zero in price_exposure.")
         except KeyError as e:
-            print(f"KeyError occurred: {e}")
+            print(f"KeyError occurred in price_exposure: {e}")
         except Exception as e:
-            print(f"An unexpected error occurred in get_product_prices: {e}")
+            print(f"An unexpected error occurred in price_exposure: {e}")
 
     def set_brand_choice(self):
         """Update brand based purchase probabilities"""
@@ -220,6 +231,8 @@ class ConsumerAgent(mesa.Agent):
         self.consume()
         if self.model.enable_ads:
             self.ad_exposure()
+        if self.model.enable_pricepoint:
+            self.price_exposure()
         self.set_brand_choice()
         self.set_purchase_behavior()
         self.purchase()

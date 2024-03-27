@@ -26,7 +26,7 @@ logger.addHandler(file_handler)
 class ConsumerModel(mesa.Model):
     """A model with some number of agents."""
 
-    def __init__(self, N, config_file, enable_ads=True):
+    def __init__(self, N, config_file, enable_ads=True, enable_pricepoint=True):
         # Initialize base class -- new requirement
         super().__init__()
         # Load CABM configuration
@@ -37,6 +37,7 @@ class ConsumerModel(mesa.Model):
         self.schedule = mesa.time.RandomActivation(self)
         self.week_number = 1  # Add week_number attribute
         self.enable_ads = enable_ads
+        self.enable_pricepoint = enable_pricepoint
         self.brand_list = self.config.brand_list
 
         # Create agents
