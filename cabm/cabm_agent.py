@@ -148,13 +148,29 @@ class ConsumerAgent(mesa.Agent):
                 self.loyalty_rate,
             )
 
-            adjusted_purchase_probabilities = (
-                price_impact_probabilities * self.purchase_probabilities
+            print(f"Price impact probabilities: {price_impact_probabilities}")
+            print(
+                f"Current purchase probabilities (after ads): {self.purchase_probabilities}"
             )
 
-            self.purchase_probabilities = adjusted_purchase_probabilities / np.sum(
-                adjusted_purchase_probabilities
+            adjusted_purchase_probabilities = {
+                brand: price_impact_probabilities[brand]
+                * self.purchase_probabilities[brand]
+                for brand in self.purchase_probabilities
+            }
+
+            print(
+                f"Adjusted, unnormalized probabilities (after price): {adjusted_purchase_probabilities}"
             )
+
+            total = np.sum(list(adjusted_purchase_probabilities.values()))
+            self.purchase_probabilities = {
+                brand: prob / total
+                for brand, prob in adjusted_purchase_probabilities.items()
+            }
+
+            print(f"Normalized purch probs after price: {self.purchase_probabilities}")
+
         except ZeroDivisionError:
             print("Error: Division by zero in price_exposure.")
         except KeyError as e:

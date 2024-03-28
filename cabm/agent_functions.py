@@ -301,8 +301,6 @@ def get_price_impact_on_purchase_probabilities(
     except Exception as e:
         print(f"Could not generate price list: {e}")
 
-    breakpoint()
-
     logging.debug(f"Using pricelist: {price_list}")
 
     try:
