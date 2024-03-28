@@ -43,7 +43,7 @@ class ConsumerAgent(mesa.Agent):
             p=list(self.config.brand_market_share.values()),
         )
         self.loyalty_rate = sample_beta_min(
-            self.config.loyalty_alpha, self.config.loyalty_beta, override=0.90
+            self.config.loyalty_alpha, self.config.loyalty_beta, override=None
         )
         self.purchase_probabilities = {
             brand: (
@@ -59,16 +59,13 @@ class ConsumerAgent(mesa.Agent):
     def initialize_ad_preferences(self):
         self.enable_ads = self.model.enable_ads
         self.ad_decay_factor = sample_normal_min(
-            self.config.ad_decay_factor, override=2
+            self.config.ad_decay_factor, override=None
         )
         self.ad_channel_preference = assign_weights(
             list(self.config.channel_priors.keys()),
             list(self.config.channel_priors.values()),
         )
         self.adstock = {i: 0 for i in self.config.brand_list}
-        self.ad_sensitivity = sample_beta_min(
-            self.config.sensitivity_alpha, self.config.sensitivity_beta
-        )
 
     def initialize_pantry(self):
         self.pantry_min = (
@@ -148,28 +145,15 @@ class ConsumerAgent(mesa.Agent):
                 self.loyalty_rate,
             )
 
-            print(f"Price impact probabilities: {price_impact_probabilities}")
-            print(
-                f"Current purchase probabilities (after ads): {self.purchase_probabilities}"
-            )
-
-            adjusted_purchase_probabilities = {
-                brand: price_impact_probabilities[brand]
-                * self.purchase_probabilities[brand]
+            # Averaging ad impact and price impact
+            self.purchase_probabilities = {
+                brand: (
+                    price_impact_probabilities[brand]
+                    + self.purchase_probabilities[brand]
+                )
+                / 2
                 for brand in self.purchase_probabilities
             }
-
-            print(
-                f"Adjusted, unnormalized probabilities (after price): {adjusted_purchase_probabilities}"
-            )
-
-            total = np.sum(list(adjusted_purchase_probabilities.values()))
-            self.purchase_probabilities = {
-                brand: prob / total
-                for brand, prob in adjusted_purchase_probabilities.items()
-            }
-
-            print(f"Normalized purch probs after price: {self.purchase_probabilities}")
 
         except ZeroDivisionError:
             print("Error: Division by zero in price_exposure.")

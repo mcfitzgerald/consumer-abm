@@ -37,7 +37,11 @@ def sample_beta_min(alpha, beta, min_value=0.05, override=None):
 
 
 # Customized softmax for ad response and price point (inverse) response
-def magnitude_adjusted_softmax(x: np.ndarray, inverse=False) -> np.ndarray:
+def magnitude_adjusted_softmax(
+    x: np.ndarray,
+    log_transform=True,
+    inverse=False,
+) -> np.ndarray:
     """Compute softmax values for each set of scores in x, with adjustments for magnitude."""
     try:
         # Handle the case where x is a list of zeros
@@ -49,9 +53,12 @@ def magnitude_adjusted_softmax(x: np.ndarray, inverse=False) -> np.ndarray:
         temperature = max(1, np.floor(np.log(np.max(x))))
         logging.debug(f"temperature = {temperature}")
 
-        # Apply log transformation
-        x = np.log1p(x)
-        logging.debug(f"log transformed = {x}")
+        # Apply optional log transformation
+        if log_transform:
+            x = np.log1p(x)
+            logging.debug(f"log transformed = {x}")
+        else:
+            logging.debug("No log transformation applied.")
 
         # Subtract the max value to prevent overflow
         if inverse:
@@ -309,7 +316,7 @@ def get_price_impact_on_purchase_probabilities(
 
         # Softmax adstock to return normalized probability distribution
         transformed_price_list = magnitude_adjusted_softmax(
-            price_list_values, inverse=True
+            price_list_values, log_transform=False, inverse=True
         )
 
         logging.debug(

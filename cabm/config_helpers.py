@@ -97,58 +97,6 @@ def generate_brand_ad_channel_map(brand_list: List[str], config: Dict) -> Dict:
     return brand_ad_channel_map
 
 
-# Configuration class
-
-
-# class Configuration:
-#     def __init__(self, config: Dict):
-#         # Set up household parameters
-#         self.household_sizes = config["household"]["household_sizes"]
-#         self.household_size_distribution = config["household"][
-#             "household_size_distribution"
-#         ]
-#         self.base_consumption_rate = config["household"]["base_consumption_rate"]
-#         self.pantry_min_percent = config["household"]["pantry_min_percent"]
-
-#         # Set up retail environment
-#         self.brand_list = list(config["brands"].keys())
-#         try:
-#             self.brand_market_share = [
-#                 config["brands"][brand]["current_market_share"]
-#                 for brand in self.brand_list
-#             ]
-#             assert round(sum(self.brand_market_share), 2) == 1.0
-#         except AssertionError:
-#             raise ValueError("Error: Brand market shares do not sum to 1.")
-#         try:
-#             self.brand_base_price = {
-#                 brand: config["brands"][brand]["base_product_price"]
-#                 for brand in self.brand_list
-#             }
-#         except KeyError:
-#             raise ValueError(
-#                 "Error: Base price for one or more brands is missing in the config."
-#             )
-
-#         # Set up advertising and promotion
-#         self.ad_decay_factor = config["household"]["ad_decay_factor"]
-#         self.joint_calendar = generate_joint_ad_promo_schedule(self.brand_list, config)
-#         self.brand_channel_map = generate_brand_ad_channel_map(self.brand_list, config)
-#         self.loyalty_alpha = config["household"]["loyalty_alpha"]
-#         self.loyalty_beta = config["household"]["loyalty_beta"]
-#         self.sensitivity_alpha = config["household"]["sensitivity_alpha"]
-#         self.sensitivity_beta = config["household"]["sensitivity_beta"]
-#         self.channel_set = set(
-#             channel
-#             for channels in self.brand_channel_map.values()
-#             for channel in channels
-#         )
-#         self.channel_priors = [
-#             config["household"]["base_channel_preferences"][channel]
-#             for channel in self.channel_set
-#         ]
-
-
 class Configuration:
     def __init__(self, config: Dict):
         self.config = config
@@ -178,8 +126,6 @@ class Configuration:
         self.brand_channel_map = generate_brand_ad_channel_map(self.brand_list, config)
         self.loyalty_alpha = config["household"]["loyalty_alpha"]
         self.loyalty_beta = config["household"]["loyalty_beta"]
-        self.sensitivity_alpha = config["household"]["sensitivity_alpha"]
-        self.sensitivity_beta = config["household"]["sensitivity_beta"]
         self.channel_set = set(
             channel
             for channels in self.brand_channel_map.values()

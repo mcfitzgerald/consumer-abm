@@ -16,15 +16,11 @@ pantry_min_percent = 0.1 # when pantry drops below 20% of household size, consum
 
 base_channel_preferences = {TV = 0.3, Web = 0.7} # if using other channels, add them here - must sum to 1
 
-ad_decay_factor = 2.0 # the higher the number, the faster the adstock decay, this just divides the adstock by the number each week
+ad_decay_factor = 3.0 # the higher the number, the faster the adstock decay, this just divides the adstock by the number each week
 
-# Purchase loyalty - upper and lower bounds for uniform distribution over agents
+# Purchase loyalty - upper and lower bounds for beta distribution over agents
 loyalty_alpha = 100
-loyalty_beta = 10
-
-# Ad sensitivity
-sensitivity_alpha = 2
-sensitivity_beta = 5
+loyalty_beta = 1
 
 [brands]
 # Base product price - the sticker price of a product
@@ -39,7 +35,7 @@ sensitivity_beta = 5
 
 [brands.A]
 name = "Brand A"
-current_market_share = 0.8
+current_market_share = 0.7
 base_product_price = 5.0
 [brands.A.promotions]
 promo_depths=[0.0, 0.25, 0.5]
@@ -53,7 +49,7 @@ ad_campaigns = {TV = "quick_lag_2", Web = "back_to_school"}
 
 [brands.B]
 name = "Brand B"
-current_market_share = 0.2
+current_market_share = 0.3
 base_product_price = 4.5
 [brands.B.promotions]
 promo_depths=[0.0, 0.25, 0.5]

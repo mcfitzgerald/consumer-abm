@@ -11,7 +11,7 @@ from .model_functions import (
 )
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 logfile = datetime.datetime.now().strftime("log_%m%d%y%H%M%p.log")
 
