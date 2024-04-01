@@ -1,35 +1,46 @@
 import pandas as pd
-from typing import Dict, List
+from typing import Dict, List, Any, Tuple
 
 
-def prepare_promo_schedule_variables(brand: str, config: Dict) -> tuple:
+def prepare_promo_schedule_variables(
+    brand: str, config: Dict[str, Any]
+) -> Tuple[float, Dict[str, float], Dict[str, float], List[int]]:
     """
     This function prepares the variables needed for the promo schedule.
 
     Args:
         brand (str): The brand for which the promo schedule is being prepared.
-        config (Dict): The configuration dictionary containing all the necessary data, read from a toml file.
+        config (Dict[str, Any]): The configuration dictionary containing all the necessary data, read from a toml file.
 
     Returns:
-        tuple: A tuple containing the base product price, promo depths, promo frequencies, and promo weeks.
+        Tuple[float, Dict[str, float], Dict[str, float], List[int]]: A tuple containing the base product price, promo depths, promo frequencies, and promo weeks.
 
     Raises:
         KeyError: If a necessary key is not found in the configuration.
         Exception: If an unexpected error occurs.
     """
     try:
+        # Extract brand and promotion information from the configuration
         brand_info = config["brands"][brand]
         promo_info = brand_info["promotions"]
-        base_product_price = brand_info["base_product_price"]
 
+        # Extract base product price, promo depths, and promo frequencies
+        base_product_price = brand_info["base_product_price"]
         promo_depths = promo_info["promo_depths"]
         promo_frequencies = promo_info["promo_frequencies"]
+
+        # Extract promo calendar and initialize promo weeks list
         promo_calendar = promo_info["promo_calendar"]
         promo_weeks = []
+
+        # For each campaign in the promo calendar, check if it exists in the configuration
+        # If it does, extend the promo weeks list with the weeks of the campaign
         for campaign in promo_calendar:
             if campaign not in config["ad_campaigns"]:
                 raise KeyError(f"{campaign} is not found in the configuration.")
             promo_weeks.extend(config["ad_campaigns"][campaign])
+
+        # Remove duplicates from promo weeks list
         promo_weeks = list(set(promo_weeks))
 
         return base_product_price, promo_depths, promo_frequencies, promo_weeks
@@ -48,7 +59,7 @@ def generate_brand_promo_schedule(
     promo_weeks: List[int],
 ) -> pd.DataFrame:
     """
-    This function generates a brand's promotional schedule.
+    Generates a brand's promotional schedule.
 
     Args:
         base_product_price (float): The base price of the product.
@@ -63,6 +74,7 @@ def generate_brand_promo_schedule(
         Exception: If an unexpected error occurs.
     """
     try:
+        # Initialize a DataFrame with 52 weeks and a 'price' column
         df = pd.DataFrame(index=pd.RangeIndex(1, 53), columns=["price"])
 
         # Calculate the number of weeks for each promo depth based on their frequencies
@@ -71,6 +83,7 @@ def generate_brand_promo_schedule(
         # Create a list of prices based on promo depths and their frequencies
         prices = []
         for depth, weeks in zip(promo_depths, weeks_per_promo):
+            # Extend the prices list with the discounted price for the number of weeks
             prices.extend([base_product_price * (1 - depth)] * weeks)
 
         # Sort the prices in ascending order
@@ -80,10 +93,12 @@ def generate_brand_promo_schedule(
         for week in promo_weeks:
             df.loc[week, "price"] = prices.pop(0)
 
-        # Distribute the remaining prices in even blocks across remaining weeks
+        # Get the list of remaining weeks where price is not assigned
         remaining_weeks = df[df["price"].isna()].index.tolist()
+        # Calculate the block size for distributing the remaining prices
         block_size = len(remaining_weeks) // len(prices)
 
+        # Distribute the remaining prices in even blocks across remaining weeks
         for i in range(0, len(remaining_weeks), block_size):
             for week in remaining_weeks[i : i + block_size]:
                 df.loc[week, "price"] = prices.pop(0)
@@ -95,4 +110,5 @@ def generate_brand_promo_schedule(
         return df
     except Exception as e:
         print(f"An unexpected error occurred in generate_brand_promo_schedule: {e}")
+        # Return an empty DataFrame in case of an error
         return pd.DataFrame()

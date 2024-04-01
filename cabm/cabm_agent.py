@@ -3,6 +3,8 @@ import mesa
 import logging
 import numpy as np
 
+from cabm.config_helpers import Configuration
+
 from .agent_functions import (
     sample_normal_min,
     sample_beta_min,
@@ -19,12 +21,56 @@ from .agent_functions import (
 
 # Instantiate agents
 class ConsumerAgent(mesa.Agent):
-    """Consumer of products"""
+    """
+    A class to represent a consumer of products.
 
-    def __init__(self, unique_id, model, config):
+    Attributes
+    ----------
+    unique_id : int
+        Unique identifier for the agent
+    model : mesa.Model
+        The model instance in which the agent lives
+    config : Configuration
+        An instance of the Configuration class containing configuration parameters for the agent
+
+    Methods
+    -------
+    initialize_household():
+        Initializes the household size and consumption rate for the agent
+    initialize_brand_preference():
+        Initializes the brand preference and loyalty rate for the agent
+    initialize_ad_preferences():
+        Initializes the ad preferences for the agent
+    initialize_pantry():
+        Initializes the pantry for the agent
+    initialize_prices():
+        Initializes the prices for the agent
+    consume():
+        Simulates the consumption of products by the agent
+    ad_exposure():
+        Handles the ad exposure for the agent
+    price_exposure():
+        Adjusts the purchase probabilities based on price impact
+    set_brand_choice():
+        Updates the brand choice based on purchase probabilities
+    set_purchase_behavior():
+        Determines the purchase behavior of the agent based on current price and pantry stock
+    purchase():
+        Simulates the purchase behavior of the agent
+    step():
+        Defines the sequence of actions for the agent in each step of the simulation
+    """
+
+    def __init__(
+        self,
+        unique_id: int,
+        model: mesa.Model,
+        config: Configuration,
+    ):
         super().__init__(unique_id, model)
         self.config = config
 
+        # Initialize agent's household, brand preference, ad preferences, pantry, and prices
         self.initialize_household()
         self.initialize_brand_preference()
         self.initialize_ad_preferences()
@@ -32,12 +78,14 @@ class ConsumerAgent(mesa.Agent):
         self.initialize_prices()
 
     def initialize_household(self):
+        """Initializes the household size and consumption rate for the agent"""
         self.household_size = np.random.choice(
             self.config.household_sizes, p=self.config.household_size_distribution
         )
         self.consumption_rate = sample_normal_min(self.config.base_consumption_rate)
 
     def initialize_brand_preference(self):
+        """Initializes the brand preference and loyalty rate for the agent"""
         self.brand_preference = np.random.choice(
             list(self.config.brand_market_share.keys()),
             p=list(self.config.brand_market_share.values()),
@@ -57,6 +105,7 @@ class ConsumerAgent(mesa.Agent):
         self.brand_choice = self.brand_preference
 
     def initialize_ad_preferences(self):
+        """Initializes the ad preferences for the agent"""
         self.enable_ads = self.model.enable_ads
         self.ad_decay_factor = sample_normal_min(
             self.config.ad_decay_factor, override=None
@@ -68,6 +117,7 @@ class ConsumerAgent(mesa.Agent):
         self.adstock = {i: 0 for i in self.config.brand_list}
 
     def initialize_pantry(self):
+        """Initializes the pantry for the agent"""
         self.pantry_min = (
             self.household_size * self.config.pantry_min_percent
         )  # Forces must-buy when stock drops percentage of household size
@@ -76,6 +126,7 @@ class ConsumerAgent(mesa.Agent):
         self.purchased_this_step = {brand: 0 for brand in self.config.brand_list}
 
     def initialize_prices(self):
+        """Initializes the prices for the agent"""
         self.current_price = self.config.brand_base_price[self.brand_choice]
         self.last_product_price = self.config.brand_base_price[self.brand_choice]
         self.purchase_behavior = "buy_minimum"
@@ -85,6 +136,7 @@ class ConsumerAgent(mesa.Agent):
         self.step_max = 0
 
     def consume(self):
+        """Simulates the consumption of products by the agent"""
         try:
             self.pantry_stock = self.pantry_stock - (
                 self.household_size / self.consumption_rate
@@ -163,7 +215,7 @@ class ConsumerAgent(mesa.Agent):
             print(f"An unexpected error occurred in price_exposure: {e}")
 
     def set_brand_choice(self):
-        """Update brand based purchase probabilities"""
+        """Updates the brand choice based on purchase probabilities"""
         brands = list(self.purchase_probabilities.keys())
         probabilities = list(self.purchase_probabilities.values())
         self.brand_choice = np.random.choice(brands, p=probabilities)
@@ -172,6 +224,7 @@ class ConsumerAgent(mesa.Agent):
         logging.debug(f"Brand choice: {self.brand_choice}")
 
     def set_purchase_behavior(self):
+        """Determines the purchase behavior of the agent based on current price and pantry stock"""
         try:
             self.current_price = get_current_price(
                 self.model.week_number,
@@ -229,6 +282,7 @@ class ConsumerAgent(mesa.Agent):
             print("An unexpected error occurred in purchase:", e)
 
     def step(self):
+        """Defines the sequence of actions for the agent in each step of the simulation"""
         self.consume()
         if self.model.enable_ads:
             self.ad_exposure()

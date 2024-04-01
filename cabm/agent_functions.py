@@ -10,111 +10,172 @@ from typing import List, Dict
 # MATH FUNCTIONS
 
 
-# A normal distribution sampler that avoids sampling below a set minimum
-def sample_normal_min(mean, std_dev=1.0, min_value=1.0, override=None):
-    """Sample from a normal distribution, rejecting values less than min_value.
-    If override is specified, return only that value."""
+def sample_normal_min(
+    mean: float, std_dev: float = 1.0, min_value: float = 1.0, override: float = None
+) -> float:
+    """
+    Function to sample from a normal distribution, rejecting values less than min_value.
+    If override is specified, return only that value.
+
+    Parameters:
+    mean (float): The mean of the normal distribution.
+    std_dev (float): The standard deviation of the normal distribution. Default is 1.0.
+    min_value (float): The minimum value that can be sampled. Default is 1.0.
+    override (float): If specified, this value will be returned instead of a sample. Default is None.
+
+    Returns:
+    float: A sample from the normal distribution that is greater than or equal to min_value, or the override value if specified.
+    """
+    # If override is specified, issue a warning and return the override value
     if override is not None:
         warnings.warn("Normal Sampler Override is in effect.")
         return override
+
+    # Sample from the normal distribution
     sample = np.random.normal(mean, std_dev)
+
+    # If the sample is less than min_value, continue sampling until a valid sample is obtained
     while sample < min_value:
         sample = np.random.normal(mean, std_dev)
+
+    # Return the valid sample
     return sample
 
 
-# A beta distributino sampler that avoids sampling below a set minimum or defaults always to override value
-def sample_beta_min(alpha, beta, min_value=0.05, override=None):
-    """Sample from a beta distribution, rejecting values less than min_value.
-    If override is specified, return only that value."""
+def sample_beta_min(
+    alpha: float, beta: float, min_value: float = 0.05, override: float = None
+) -> float:
+    """
+    Function to sample from a beta distribution, rejecting values less than min_value.
+    If override is specified, return only that value.
+
+    Parameters:
+    alpha (float): The alpha parameter of the beta distribution.
+    beta (float): The beta parameter of the beta distribution.
+    min_value (float): The minimum value that can be sampled. Default is 0.05.
+    override (float): If specified, this value will be returned instead of a sample. Default is None.
+
+    Returns:
+    float: A sample from the beta distribution that is greater than or equal to min_value, or the override value if specified.
+    """
+    # If override is specified, issue a warning and return the override value
     if override is not None:
         warnings.warn("Beta Sampler Override is in effect.")
         return override
+
+    # Sample from the beta distribution
     sample = np.random.beta(alpha, beta)
+
+    # If the absolute value of the sample is less than min_value, continue sampling until a valid sample is obtained
     while abs(sample) < min_value:
         sample = np.random.beta(alpha, beta)
+
+    # Return the valid sample
     return sample
 
 
-# Customized softmax for ad response and price point (inverse) response
 def magnitude_adjusted_softmax(
     x: np.ndarray,
-    log_transform=True,
-    inverse=False,
+    log_transform: bool = True,
+    inverse: bool = False,
 ) -> np.ndarray:
-    """Compute softmax values for each set of scores in x, with adjustments for magnitude."""
+    """
+    Compute softmax values for each set of scores in x, with adjustments for magnitude.
+
+    Parameters:
+    x (np.ndarray): Input numpy array for which softmax is to be computed.
+    log_transform (bool): If True, applies log transformation to the input array. Default is True.
+    inverse (bool): If True, subtracts the input array from its max value to prevent overflow. Default is False.
+
+    Returns:
+    np.ndarray: A numpy array of the same shape as x, where each element is the softmax of the corresponding element in x.
+    """
     try:
-        # Handle the case where x is a list of zeros
+        # If all elements in x are zero, return an array of the same shape where each element is 1 divided by the number of elements in x
         if np.all(x == 0):
             return np.full(x.shape, 1.0 / x.size)
 
-        # Set temperature relative to max value if not overidden
-        # Note this is critical to do before overflow prevention step -- need to test if it changes before log
+        # Set temperature relative to max value in x. This is done before the overflow prevention step
         temperature = max(1, np.floor(np.log(np.max(x))))
-        logging.debug(f"temperature = {temperature}")
+        logging.debug(f"Temperature for softmax calculation: {temperature}")
 
-        # Apply optional log transformation
+        # If log_transform is True, apply log transformation to x
         if log_transform:
             x = np.log1p(x)
-            logging.debug(f"log transformed = {x}")
+            logging.debug(f"Log transformed input: {x}")
         else:
-            logging.debug("No log transformation applied.")
+            logging.debug("No log transformation applied to input.")
 
-        # Subtract the max value to prevent overflow
+        # If inverse is True, subtract x from its max value to prevent overflow
         if inverse:
             x = np.max(x) - x
         else:
             x = x - np.max(x)
-        logging.debug(f"overflow transform = {x}")
+        logging.debug(f"Input after overflow prevention: {x}")
 
+        # Compute softmax values
         e_x = np.exp(x / temperature)
-        logging.debug(f"e_x = {e_x}")
+        logging.debug(f"Softmax values: {e_x}")
         return e_x / np.sum(e_x)
     except ZeroDivisionError:
-        print("Error: Division by zero in softmax.")
+        print("Error: Division by zero in softmax calculation.")
     except TypeError:
         print("Error: Input should be a numpy array.")
     except Exception as e:
-        print(f"An unexpected error occurred in softmax: {e}")
+        print(f"An unexpected error occurred in softmax calculation: {e}")
 
 
 # AGENT SETUP FUNCTIONS
 
 
-def get_pantry_max(household_size, pantry_min):
+def get_pantry_max(household_size: int, pantry_min: int) -> int:
     """
-    Statistical assignment of maximum number of products a given household stocks
-    Pantry min must be set before calling (default behavior of agent class)
+    This function statistically assigns the maximum number of products a given household stocks.
+    The pantry minimum must be set before calling this function (default behavior of agent class).
+
+    Parameters:
+    household_size (int): The size of the household.
+    pantry_min (int): The minimum number of products in the pantry.
+
+    Returns:
+    int: The maximum number of products a given household stocks.
     """
     try:
+        # Generate a random number from a normal distribution with mean equal to household_size and standard deviation 1
         pantry_max = math.ceil(np.random.normal(household_size, 1))
+
+        # If the generated pantry_max is less than pantry_min, set pantry_max to pantry_min
         if pantry_max < pantry_min:
             pantry_max = math.ceil(pantry_min)
+
         return pantry_max
     except Exception as e:
         print("An unexpected error occurred in get_pantry_max:", e)
 
 
-def assign_weights(items: List[str], prior_weights: List[float]) -> Dict:
+def assign_weights(items: List[str], prior_weights: List[float]) -> Dict[str, float]:
     """
-    This function is used to randomize media channel preferences for each agent.
+    This function is used to randomize media channel preferences for each agent by assigning weights to items.
+    The weights are calculated by adding random fluctuations to the prior weights and then normalizing them.
 
     Parameters:
-    items (list): A list of items.
-    prior_weights (list): A list of prior weights for the items.
+    items (List[str]): A list of items.
+    prior_weights (List[float]): A list of prior weights for the items.
 
     Returns:
-    dict: A dictionary mapping items to their weights.
+    Dict[str, float]: A dictionary mapping items to their weights.
     """
     try:
-        # Generate random fluctuations
+        # Generate random fluctuations for each item
         fluctuations = [random.random() for _ in items]
 
-        # Apply fluctuations to prior weights
+        # Apply fluctuations to prior weights to create new weights
         weights = [w + f for w, f in zip(prior_weights, fluctuations)]
 
-        # Normalize weights so they sum to 1
+        # Calculate the sum of the weights
         weight_sum = sum(weights)
+
+        # Normalize weights so they sum to 1 by dividing each weight by the sum of weights
         weights = [w / weight_sum for w in weights]
 
         # Create a dictionary to map items to their weights
@@ -130,51 +191,61 @@ def assign_weights(items: List[str], prior_weights: List[float]) -> Dict:
 def calculate_adstock(
     week: int,
     joint_calendar: pd.DataFrame,
-    brand_channel_map: Dict,
-    channel_preference: Dict,
-) -> Dict:
+    brand_channel_map: Dict[str, List[str]],
+    channel_preference: Dict[str, float],
+) -> Dict[str, float]:
     """
-    This function calculates the adstock for each brand.
+    This function calculates the adstock for each brand. Adstock is the total weighted spend for each brand.
 
     Parameters:
     week (int): The current week.
-    joint_calendar (DataFrame): A DataFrame representing the joint calendar.
-    brand_channel_map (dict): A dictionary mapping brands to their channels.
-    channel_preference (dict): A dictionary mapping channels to their preference weights.
+    joint_calendar (pd.DataFrame): A DataFrame representing the joint calendar. The joint calendar contains the spend for each brand and channel for each week.
+    brand_channel_map (Dict[str, List[str]]): A dictionary mapping brands to their channels. Each brand can have multiple channels.
+    channel_preference (Dict[str, float]): A dictionary mapping channels to their preference weights. The preference weight is used to weight the spend for each channel.
 
     Returns:
-    dict: A dictionary mapping brands to their adstock.
+    Dict[str, float]: A dictionary mapping brands to their adstock. The adstock for each brand is the sum of the weighted spend for all its channels.
     """
     adstock = {}
     try:
+        # Loop over each brand and its channels
         for brand, channels in brand_channel_map.items():
+            # Loop over each channel for the current brand
             for channel in channels:
+                # Get the spend for the current brand and channel for the current week
                 spend = joint_calendar.loc[week, (brand, channel)]
+                # Calculate the weighted spend by multiplying the spend by the preference weight for the current channel
                 weighted_spend = spend * channel_preference[channel]
+                # If the brand is already in the adstock dictionary, add the weighted spend to its current adstock
                 if brand in adstock:
                     adstock[brand] += weighted_spend
+                # If the brand is not in the adstock dictionary, add it to the dictionary with the weighted spend as its adstock
                 else:
                     adstock[brand] = weighted_spend
     except KeyError as e:
-        print(f"KeyError: {e}")
+        print(
+            f"KeyError: {e}. Check if the brand and channel exist in the joint calendar and the channel exists in the channel preference."
+        )
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
     return adstock
 
 
-def ad_decay(adstock: Dict, factor: float) -> Dict:
+def ad_decay(adstock: Dict[str, float], factor: float) -> Dict[str, float]:
     """
     This function applies a decay factor to the adstock of each brand. If the resulting adstock is less than 1,
     it is set to 1.
 
     Parameters:
-    adstock (dict): A dictionary mapping brands to their adstock.
+    adstock (Dict[str, float]): A dictionary mapping brands to their adstock.
     factor (float): The decay factor.
 
     Returns:
-    dict: A dictionary mapping brands to their decayed adstock.
+    Dict[str, float]: A dictionary mapping brands to their decayed adstock.
     """
     try:
+        # Apply decay factor to each brand's adstock
+        # If the resulting adstock is less than 1, set it to 1
         return {
             brand: (value / factor) if (value / factor) > 1.0 else 1.0
             for brand, value in adstock.items()
@@ -189,78 +260,95 @@ def ad_decay(adstock: Dict, factor: float) -> Dict:
         )
 
 
-def update_adstock(adstock1: Dict, adstock2: Dict) -> Dict:
+def update_adstock(
+    adstock1: Dict[str, float], adstock2: Dict[str, float]
+) -> Dict[str, float]:
     """
     This function updates the adstock of each brand by adding the values from a second adstock dictionary.
+    If a brand is present in both dictionaries, the values are added. If a brand is only present in the second dictionary,
+    it is added to the updated adstock dictionary with its value.
 
     Parameters:
-    adstock1 (dict): The first adstock dictionary.
-    adstock2 (dict): The second adstock dictionary.
+    adstock1 (Dict[str, float]): The first adstock dictionary mapping brands to their adstock.
+    adstock2 (Dict[str, float]): The second adstock dictionary mapping brands to their adstock.
 
     Returns:
-    dict: A dictionary representing the updated adstock.
+    Dict[str, float]: A dictionary representing the updated adstock mapping brands to their updated adstock.
     """
     try:
+        # Create a copy of the first adstock dictionary to avoid modifying the original
         updated_adstock = adstock1.copy()
+        # Iterate over each brand and its adstock in the second adstock dictionary
         for brand, value in adstock2.items():
+            # If the brand is already in the updated adstock dictionary, add the value from the second adstock dictionary
             if brand in updated_adstock:
                 updated_adstock[brand] += value
+            # If the brand is not in the updated adstock dictionary, add it with its value from the second adstock dictionary
             else:
                 updated_adstock[brand] = value
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+    # Return the updated adstock dictionary
     return updated_adstock
 
 
 def get_ad_impact_on_purchase_probabilities(
-    adstock: Dict,
+    adstock: Dict[str, float],
     brand_preference: str,
     loyalty_rate: float,
-) -> Dict:
+) -> Dict[str, float]:
     """
-    This function calculates the probability of purchasing each brand.
+    This function calculates the probability of purchasing each brand based on the adstock, brand preference, and loyalty rate.
 
     Parameters:
-    adstock (dict): A dictionary mapping brands to their adstock.
+    adstock (Dict[str, float]): A dictionary mapping brands to their adstock.
     brand_preference (str): The preferred brand.
     loyalty_rate (float): The loyalty rate.
 
     Returns:
-    dict: A dictionary mapping brands to their purchase probabilities.
+    Dict[str, float]: A dictionary mapping brands to their purchase probabilities.
     """
 
     logging.debug(f"Using adstock: {adstock}")
 
     try:
+        # Extract brands and their corresponding adstock values
         brands = list(adstock.keys())
         adstock_values = np.array(list(adstock.values()))
 
-        # Softmax adstock to return normalized probability distribution
+        # Apply softmax transformation to adstock values to get a normalized probability distribution
         transformed_adstock = magnitude_adjusted_softmax(adstock_values)
 
-        logging.debug(f"magnitude adjusted softmax adstock: {transformed_adstock}")
+        logging.debug(
+            f"Transformed adstock using magnitude adjusted softmax: {transformed_adstock}"
+        )
 
         # Initialize base probabilities with equal chance for non-preferred brands
         base_probabilities = np.full_like(
             transformed_adstock, (1 - loyalty_rate) / (len(brands) - 1)
         )
 
-        logging.debug(f"first pass base probabilities: {base_probabilities}")
+        logging.debug(f"Base probabilities after first pass: {base_probabilities}")
 
+        # Update the base probability of the preferred brand with the loyalty rate
         brand_preference_index = brands.index(brand_preference)
         base_probabilities[brand_preference_index] = loyalty_rate
 
-        logging.debug(f"second pass base probabilities: {base_probabilities}")
+        logging.debug(f"Base probabilities after second pass: {base_probabilities}")
 
+        # Adjust the base probabilities with the transformed adstock values
         adjusted_probabilities = transformed_adstock * base_probabilities
 
-        logging.debug(f"unnormalized adjusted probabilities: {adjusted_probabilities}")
+        logging.debug(
+            f"Adjusted probabilities before normalization: {adjusted_probabilities}"
+        )
 
         # Normalize the adjusted probabilities so they sum to 1
         probabilities = adjusted_probabilities / np.sum(adjusted_probabilities)
 
-        logging.debug(f"normalized probabilities: {probabilities}")
+        logging.debug(f"Final normalized probabilities: {probabilities}")
 
+        # Return a dictionary mapping brands to their purchase probabilities
         return dict(zip(brands, probabilities))
     except ZeroDivisionError:
         print("Error: Division by zero.")
@@ -273,26 +361,39 @@ def get_ad_impact_on_purchase_probabilities(
 # PRICE IMPACT FUNCTIONS
 
 
-def get_current_price(week, joint_calendar, brand):
+def get_current_price(week: int, joint_calendar: pd.DataFrame, brand: str) -> float:
+    """
+    This function retrieves the current price of a specific brand in a given week from the joint calendar.
+
+    Parameters:
+    week (int): The week number.
+    joint_calendar (pd.DataFrame): A DataFrame containing the joint calendar.
+    brand (str): The brand for which the price is to be retrieved.
+
+    Returns:
+    float: The price of the brand in the given week.
+    """
+    # Retrieve the price of the brand in the given week from the joint calendar
     price = joint_calendar.loc[week, (brand, "price")]
     return price
 
 
 def get_price_impact_on_purchase_probabilities(
-    week_number,
-    brand_list,
-    joint_calendar,
+    week_number: int,
+    brand_list: List[str],
+    joint_calendar: pd.DataFrame,
     brand_preference: str,
     loyalty_rate: float,
-) -> Dict:
+) -> Dict[str, float]:
     """
     This function calculates the probability of purchasing each brand.
-    Note the there is separate logic for how much of a chosen brand to purchase,
+    Note that there is separate logic for how much of a chosen brand to purchase,
     this differs by setting probability of switching brands based on price.
 
     Parameters:
     week_number (int): The week number.
-    joint_calendar (DataFrame): A DataFrame containing the joint calendar.
+    brand_list (List[str]): A list of all available brands.
+    joint_calendar (pd.DataFrame): A DataFrame containing the joint calendar.
     brand_preference (str): The preferred brand.
     loyalty_rate (float): The loyalty rate.
 
@@ -302,6 +403,7 @@ def get_price_impact_on_purchase_probabilities(
     logging.debug("Entered Price Impact Block")
     price_list = {}
 
+    # Generate price list for all brands
     try:
         for brand in brand_list:
             price_list[brand] = joint_calendar.loc[week_number, (brand, "price")]
@@ -314,7 +416,7 @@ def get_price_impact_on_purchase_probabilities(
         brands = list(price_list.keys())
         price_list_values = np.array(list(price_list.values()))
 
-        # Softmax adstock to return normalized probability distribution
+        # Apply inverse softmax transformation to price list to get normalized probability distribution
         transformed_price_list = magnitude_adjusted_softmax(
             price_list_values, log_transform=False, inverse=True
         )
@@ -328,18 +430,21 @@ def get_price_impact_on_purchase_probabilities(
             transformed_price_list, (1 - loyalty_rate) / (len(brands) - 1)
         )
 
+        # Update the base probability of the preferred brand with the loyalty rate
         brand_preference_index = brands.index(brand_preference)
         base_probabilities[brand_preference_index] = loyalty_rate
 
-        logging.debug(f"base pricing probabilities: {base_probabilities}")
+        logging.debug(f"Base pricing probabilities: {base_probabilities}")
 
+        # Adjust the base probabilities with the transformed price list values
         adjusted_probabilities = transformed_price_list * base_probabilities
 
         # Normalize the adjusted probabilities so they sum to 1
         probabilities = adjusted_probabilities / np.sum(adjusted_probabilities)
 
-        logging.debug(f"normalized pricing probabilities: {probabilities}")
+        logging.debug(f"Normalized pricing probabilities: {probabilities}")
 
+        # Return a dictionary mapping brands to their purchase probabilities
         return dict(zip(brands, probabilities))
     except ZeroDivisionError:
         print("Error: Division by zero.")

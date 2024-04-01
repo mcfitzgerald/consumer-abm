@@ -11,18 +11,16 @@ from .promo_calendar import (
 
 
 # Ad and Promo Schedule
-
-
 def generate_joint_ad_promo_schedule(brands: List[str], config: Dict) -> pd.DataFrame:
     """
-    This function generates a joint ad and promo schedule for a list of brands.
+    Generates a joint ad and promo schedule for a list of brands.
 
-    Parameters:
-    brands (List[str]): A list of brand names.
-    config (Dict): A dictionary containing configuration parameters.
+    Args:
+        brands (List[str]): A list of brand names.
+        config (Dict): A dictionary containing configuration parameters.
 
     Returns:
-    pd.DataFrame: A DataFrame containing the joint ad and promo schedule for the brands.
+        pd.DataFrame: A DataFrame containing the joint ad and promo schedule for the brands.
     """
     joint_schedule = pd.DataFrame()
 
@@ -71,18 +69,16 @@ def generate_joint_ad_promo_schedule(brands: List[str], config: Dict) -> pd.Data
 
 
 # Brand-Ad Channel Map
-
-
 def generate_brand_ad_channel_map(brand_list: List[str], config: Dict) -> Dict:
     """
-    This function generates a map of brands to their advertising channels.
+    Generates a map of brands to their advertising channels.
 
-    Parameters:
-    brand_list (list): A list of brands.
-    config (dict): A dictionary containing the configuration settings.
+    Args:
+        brand_list (List[str]): A list of brands.
+        config (Dict): A dictionary containing the configuration settings.
 
     Returns:
-    dict: A dictionary mapping brands to their advertising channels.
+        Dict: A dictionary mapping brands to their advertising channels.
     """
     brand_ad_channel_map = {}
     try:
@@ -98,6 +94,27 @@ def generate_brand_ad_channel_map(brand_list: List[str], config: Dict) -> Dict:
 
 
 class Configuration:
+    """
+    A class to represent the configuration of the model. Fed by config.toml file.
+
+    Attributes:
+        config (Dict): A dictionary containing the configuration settings.
+        household_sizes (List[int]): A list of household sizes.
+        household_size_distribution (List[float]): A list of household size distributions.
+        base_consumption_rate (float): The base consumption rate.
+        pantry_min_percent (float): The minimum pantry percent.
+        brand_list (List[str]): A list of brands.
+        brand_market_share (Dict[str, float]): A dictionary mapping brands to their market shares.
+        brand_base_price (Dict[str, float]): A dictionary mapping brands to their base prices.
+        ad_decay_factor (float): The ad decay factor.
+        joint_calendar (pd.DataFrame): A DataFrame representing the joint calendar.
+        brand_channel_map (Dict[str, List[str]]): A dictionary mapping brands to their channels.
+        loyalty_alpha (float): The loyalty alpha.
+        loyalty_beta (float): The loyalty beta.
+        channel_set (set): A set of channels.
+        channel_priors (Dict[str, float]): A dictionary mapping channels to their priors.
+    """
+
     def __init__(self, config: Dict):
         self.config = config
 
