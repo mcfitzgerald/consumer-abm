@@ -1,0 +1,34 @@
+cabm/promo_calendar.py:1: error: Library stubs not installed for "pandas"  [import-untyped]
+cabm/promo_calendar.py:81: error: No overload variant of "round" matches argument type "str"  [call-overload]
+cabm/promo_calendar.py:81: note: Possible overload variants:
+cabm/promo_calendar.py:81: note:     def [_T] round(number: _SupportsRound1[_T], ndigits: None = ...) -> _T
+cabm/promo_calendar.py:81: note:     def [_T] round(number: _SupportsRound2[_T], ndigits: SupportsIndex) -> _T
+cabm/promo_calendar.py:87: error: Unsupported operand types for * ("float" and "int")  [operator]
+cabm/promo_calendar.py:87: error: Unsupported operand types for - ("int" and "str")  [operator]
+cabm/ad_calendar.py:1: error: Library stubs not installed for "pandas"  [import-untyped]
+cabm/model_functions.py:3: error: Skipping analyzing "mesa": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+cabm/model_functions.py:6: error: Missing return statement  [return]
+cabm/model_functions.py:35: error: Missing return statement  [return]
+cabm/agent_functions.py:6: error: Library stubs not installed for "pandas"  [import-untyped]
+cabm/agent_functions.py:14: error: Incompatible default for argument "override" (default has type "None", argument has type "float")  [assignment]
+cabm/agent_functions.py:14: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+cabm/agent_functions.py:14: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+cabm/agent_functions.py:46: error: Incompatible default for argument "override" (default has type "None", argument has type "float")  [assignment]
+cabm/agent_functions.py:46: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+cabm/agent_functions.py:46: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+cabm/agent_functions.py:77: error: Missing return statement  [return]
+cabm/agent_functions.py:131: error: Missing return statement  [return]
+cabm/agent_functions.py:209: error: Need type annotation for "adstock" (hint: "adstock: Dict[<type>, <type>] = ...")  [var-annotated]
+cabm/agent_functions.py:234: error: Missing return statement  [return]
+cabm/agent_functions.py:295: error: Missing return statement  [return]
+cabm/agent_functions.py:381: error: Missing return statement  [return]
+cabm/config_helpers.py:1: error: Library stubs not installed for "pandas"  [import-untyped]
+cabm/config_helpers.py:1: note: Hint: "python3 -m pip install pandas-stubs"
+cabm/config_helpers.py:48: error: "None" object is not iterable  [misc]
+cabm/cabm_agent.py:2: error: Skipping analyzing "mesa": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+cabm/cabm_model.py:1: error: Skipping analyzing "mesa": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+cabm/cabm_model.py:1: note: See https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
+cabm/cabm_model.py:2: error: Library stubs not installed for "toml"  [import-untyped]
+cabm/cabm_model.py:2: note: Hint: "python3 -m pip install types-toml"
+cabm/cabm_model.py:2: note: (or run "mypy --install-types" to install all missing stub packages)
+Found 22 errors in 7 files (checked 1 source file)
