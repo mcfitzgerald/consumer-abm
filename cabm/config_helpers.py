@@ -134,6 +134,12 @@ class Configuration:
             for brand, info in config["brands"].items()
         }
 
+        self.consumption_rate_override = config["household"][
+            "consumption_rate_override"
+        ]
+        self.ad_decay_override = config["household"]["ad_decay_override"]
+        self.loyalty_rate_override = config["household"]["loyalty_rate_override"]
+
         # Set up advertising and promotion
         self.ad_decay_factor = config["household"]["ad_decay_factor"]
         self.joint_calendar = generate_joint_ad_promo_schedule(self.brand_list, config)

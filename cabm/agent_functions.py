@@ -11,7 +11,7 @@ from typing import List, Dict
 
 
 def sample_normal_min(
-    mean: float, std_dev: float = 1.0, min_value: float = 1.0, override: float = None
+    mean: float, std_dev: float = 1.0, min_value: float = 1.0, override: float = 0
 ) -> float:
     """
     Function to sample from a normal distribution, rejecting values less than min_value.
@@ -27,7 +27,7 @@ def sample_normal_min(
     float: A sample from the normal distribution that is greater than or equal to min_value, or the override value if specified.
     """
     # If override is specified, issue a warning and return the override value
-    if override is not None:
+    if override is not 0:
         warnings.warn("Normal Sampler Override is in effect.")
         return override
 
@@ -43,7 +43,7 @@ def sample_normal_min(
 
 
 def sample_beta_min(
-    alpha: float, beta: float, min_value: float = 0.05, override: float = None
+    alpha: float, beta: float, min_value: float = 0.05, override: float = 0
 ) -> float:
     """
     Function to sample from a beta distribution, rejecting values less than min_value.
@@ -59,7 +59,7 @@ def sample_beta_min(
     float: A sample from the beta distribution that is greater than or equal to min_value, or the override value if specified.
     """
     # If override is specified, issue a warning and return the override value
-    if override is not None:
+    if override is not 0:
         warnings.warn("Beta Sampler Override is in effect.")
         return override
 

@@ -82,7 +82,10 @@ class ConsumerAgent(mesa.Agent):
         self.household_size = np.random.choice(
             self.config.household_sizes, p=self.config.household_size_distribution
         )
-        self.consumption_rate = sample_normal_min(self.config.base_consumption_rate)
+        self.consumption_rate = sample_normal_min(
+            self.config.base_consumption_rate,
+            override=self.config.consumption_rate_override,
+        )
 
     def initialize_brand_preference(self):
         """Initializes the brand preference and loyalty rate for the agent"""
@@ -91,7 +94,9 @@ class ConsumerAgent(mesa.Agent):
             p=list(self.config.brand_market_share.values()),
         )
         self.loyalty_rate = sample_beta_min(
-            self.config.loyalty_alpha, self.config.loyalty_beta, override=None
+            self.config.loyalty_alpha,
+            self.config.loyalty_beta,
+            override=self.config.loyalty_rate_override,
         )
         self.purchase_probabilities = {
             brand: (
@@ -108,7 +113,7 @@ class ConsumerAgent(mesa.Agent):
         """Initializes the ad preferences for the agent"""
         self.enable_ads = self.model.enable_ads
         self.ad_decay_factor = sample_normal_min(
-            self.config.ad_decay_factor, override=None
+            self.config.ad_decay_factor, override=self.config.ad_decay_override
         )
         self.ad_channel_preference = assign_weights(
             list(self.config.channel_priors.keys()),

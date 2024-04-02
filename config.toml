@@ -10,6 +10,7 @@ household_size_distribution = [0.28,0.36,0.15,0.12,0.06,0.02,0.01]
 # Concretely, that could mean a tube of toothpaste takes 3 weeks to use per person
 # Consumption rates are defined statistically via absolute value of a normal distribution
 base_consumption_rate = 3
+consumption_rate_override = 0
 
 # Pantry minimum percent (percent of household size)
 pantry_min_percent = 0.1 # when pantry drops below 10% of household size, consumer must buy to replenish
@@ -17,10 +18,12 @@ pantry_min_percent = 0.1 # when pantry drops below 10% of household size, consum
 base_channel_preferences = {TV = 0.3, Web = 0.7} # if using other channels, add them here - must sum to 1
 
 ad_decay_factor = 3.0 # the higher the number, the faster the adstock decay, this just divides the adstock by the number each week
+ad_decay_override = 0
 
 # Purchase loyalty - upper and lower bounds for beta distribution over agents
 loyalty_alpha = 100
 loyalty_beta = 1
+loyalty_rate_override = 0
 
 [brands]
 # Base product price - the sticker price of a product
