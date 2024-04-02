@@ -40,7 +40,7 @@ base_product_price = 5.0
 [brands.A.promotions]
 promo_depths=[0.25, 0.5]
 promo_frequencies=[0.6, 0.3, 0.1]
-promo_calendar = {"summer_sale" = 0.25, "back_to_school" = 0.5}
+promo_calendar = {summer_sale = 0.25, back_to_school = 0.5}
 [brands.A.advertising]
 budget = 1000000.0
 channels = ["TV", "Web"]
@@ -54,7 +54,7 @@ base_product_price = 4.5
 [brands.B.promotions]
 promo_depths=[0.25, 0.5]
 promo_frequencies=[0.5, 0.25, 0.25]
-promo_calendar = {"quick_lag_2" = 0.25, "summer_sale" = 0.5}
+promo_calendar = {quick_lag_2 = 0.25, summer_sale = 0.5}
 [brands.B.advertising]
 budget = 600000.0
 channels = ["TV", "Web"]

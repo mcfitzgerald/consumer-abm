@@ -116,13 +116,14 @@ def magnitude_adjusted_softmax(
         # Compute softmax values
         e_x = np.exp(x / temperature)
         logging.debug(f"Softmax values: {e_x}")
-        return e_x / np.sum(e_x)
+
     except ZeroDivisionError:
         print("Error: Division by zero in softmax calculation.")
     except TypeError:
         print("Error: Input should be a numpy array.")
     except Exception as e:
         print(f"An unexpected error occurred in softmax calculation: {e}")
+    return e_x / np.sum(e_x)
 
 
 # AGENT SETUP FUNCTIONS
@@ -148,9 +149,9 @@ def get_pantry_max(household_size: int, pantry_min: int) -> int:
         if pantry_max < pantry_min:
             pantry_max = math.ceil(pantry_min)
 
-        return pantry_max
     except Exception as e:
         print("An unexpected error occurred in get_pantry_max:", e)
+    return pantry_max
 
 
 def assign_weights(items: List[str], prior_weights: List[float]) -> Dict[str, float]:
@@ -206,7 +207,7 @@ def calculate_adstock(
     Returns:
     Dict[str, float]: A dictionary mapping brands to their adstock. The adstock for each brand is the sum of the weighted spend for all its channels.
     """
-    adstock = {}
+    adstock: Dict[str, float] = {}
     try:
         # Loop over each brand and its channels
         for brand, channels in brand_channel_map.items():
@@ -246,7 +247,7 @@ def ad_decay(adstock: Dict[str, float], factor: float) -> Dict[str, float]:
     try:
         # Apply decay factor to each brand's adstock
         # If the resulting adstock is less than 1, set it to 1
-        return {
+        decayed_adstock = {
             brand: (value / factor) if (value / factor) > 1.0 else 1.0
             for brand, value in adstock.items()
         }
@@ -258,6 +259,7 @@ def ad_decay(adstock: Dict[str, float], factor: float) -> Dict[str, float]:
         print(
             f"An unexpected error occurred: {e}, current adstock: {adstock}, current factor: {factor}"
         )
+    return decayed_adstock
 
 
 def update_adstock(
@@ -349,13 +351,14 @@ def get_ad_impact_on_purchase_probabilities(
         logging.debug(f"Final normalized probabilities: {probabilities}")
 
         # Return a dictionary mapping brands to their purchase probabilities
-        return dict(zip(brands, probabilities))
+
     except ZeroDivisionError:
         print("Error: Division by zero.")
     except KeyError as e:
         print(f"KeyError: {e}")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+    return dict(zip(brands, probabilities))
 
 
 # PRICE IMPACT FUNCTIONS
@@ -445,10 +448,11 @@ def get_price_impact_on_purchase_probabilities(
         logging.debug(f"Normalized pricing probabilities: {probabilities}")
 
         # Return a dictionary mapping brands to their purchase probabilities
-        return dict(zip(brands, probabilities))
+
     except ZeroDivisionError:
         print("Error: Division by zero.")
     except KeyError as e:
         print(f"KeyError: {e}")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+    return dict(zip(brands, probabilities))

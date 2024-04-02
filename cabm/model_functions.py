@@ -27,9 +27,9 @@ def compute_total_purchases(model: Model) -> Dict[str, int]:
                 # Add the number of purchases of the current brand by the current agent to the total
                 purchases[brand] += agent.purchased_this_step[brand]
 
-        return purchases
     except Exception as e:
         print("An unexpected error occurred in compute_total_purchases:", e)
+    return purchases
 
 
 def compute_average_price(model: Model) -> float:
@@ -50,6 +50,7 @@ def compute_average_price(model: Model) -> float:
         prices = [agent.current_price for agent in model.schedule.agents]
 
         # Return the mean of the prices
-        return np.mean(prices)
+
     except Exception as e:
         print("An unexpected error occurred in compute_average_price:", e)
+    return np.mean(prices)
