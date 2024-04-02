@@ -30,7 +30,7 @@ def prepare_ad_schedule_variables(
 
         # Construct the schedule dictionary where the keys are the media channels and the values are the corresponding ad campaigns
         schedule = {
-            channel: config["ad_campaigns"][campaign]
+            channel: config["campaign_library"][campaign]
             for channel, campaign in ad_info["ad_campaigns"].items()
         }
 

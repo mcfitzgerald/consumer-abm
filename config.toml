@@ -38,9 +38,9 @@ name = "Brand A"
 current_market_share = 0.7
 base_product_price = 5.0
 [brands.A.promotions]
-promo_depths=[0.0, 0.25, 0.5]
+promo_depths=[0.25, 0.5]
 promo_frequencies=[0.6, 0.3, 0.1]
-promo_calendar = ["summer_sale", "back_to_school"]
+promo_calendar = {"summer_sale" = 0.25, "back_to_school" = 0.5}
 [brands.A.advertising]
 budget = 1000000.0
 channels = ["TV", "Web"]
@@ -52,9 +52,9 @@ name = "Brand B"
 current_market_share = 0.3
 base_product_price = 4.5
 [brands.B.promotions]
-promo_depths=[0.0, 0.25, 0.5]
+promo_depths=[0.25, 0.5]
 promo_frequencies=[0.5, 0.25, 0.25]
-promo_calendar = ["quick_lag_2", "summer_sale"]
+promo_calendar = {"quick_lag_2" = 0.25, "summer_sale" = 0.5}
 [brands.B.advertising]
 budget = 600000.0
 channels = ["TV", "Web"]
@@ -63,7 +63,7 @@ ad_campaigns = {TV = "spring_sale", Web = "back_to_school"}
 
 # You can add additional brands here
 
-[ad_campaigns]
+[campaign_library]
 first_three_weeks_per_quarter = [1, 2, 3, 14, 15, 16, 27, 28, 29, 40, 41, 42]
 holiday_season = [48, 49, 50, 51, 52]
 back_to_school = [33, 34, 35]

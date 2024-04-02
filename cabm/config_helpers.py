@@ -27,16 +27,13 @@ def generate_joint_ad_promo_schedule(brands: List[str], config: Dict) -> pd.Data
     for brand in brands:
         try:
             # Prepare variables for promo schedule
-            (
-                base_product_price,
-                promo_depths,
-                promo_frequencies,
-                promo_weeks,
-            ) = prepare_promo_schedule_variables(brand, config)
+            (base_product_price, promo_calendar) = prepare_promo_schedule_variables(
+                brand, config
+            )
 
             # Generate promo schedule
             promo_schedule = generate_brand_promo_schedule(
-                base_product_price, promo_depths, promo_frequencies, promo_weeks
+                base_product_price, promo_calendar
             )
 
             # Prepare variables for ad schedule
