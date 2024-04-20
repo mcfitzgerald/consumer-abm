@@ -27,7 +27,7 @@ def sample_normal_min(
     float: A sample from the normal distribution that is greater than or equal to min_value, or the override value if specified.
     """
     # If override is specified, issue a warning and return the override value
-    if override is not 0:
+    if override != 0:
         warnings.warn("Normal Sampler Override is in effect.")
         return override
 
@@ -59,7 +59,7 @@ def sample_beta_min(
     float: A sample from the beta distribution that is greater than or equal to min_value, or the override value if specified.
     """
     # If override is specified, issue a warning and return the override value
-    if override is not 0:
+    if override != 0:
         warnings.warn("Beta Sampler Override is in effect.")
         return override
 

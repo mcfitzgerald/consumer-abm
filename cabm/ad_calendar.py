@@ -45,7 +45,7 @@ def prepare_ad_schedule_variables(
 
 
 def generate_brand_ad_schedule(
-    budget: int,
+    budget: float,
     media_channels: List[str],
     priority: Dict[str, int],
     schedule: Dict[str, List[int]],
@@ -58,7 +58,7 @@ def generate_brand_ad_schedule(
     The ad schedule is created based on the budget, media channels, priority, schedule, and spending strategy.
 
     Parameters:
-    budget (int): The total marketing budget.
+    budget (float): The total marketing budget.
     media_channels (List[str]): A list of media channels.
     priority (Dict[str, int]): A dictionary where the keys are the media channels and the values are the priority of each channel.
     schedule (Dict[str, List[int]]): A dictionary where the keys are the media channels and the values are lists of weeks during which the campaigns are run.

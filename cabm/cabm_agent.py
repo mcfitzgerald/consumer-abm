@@ -109,6 +109,9 @@ class ConsumerAgent(mesa.Agent):
         # Adding a brand choice in addition to preference so that preference remains but choice can change
         self.brand_choice = self.brand_preference
 
+        # Purchase history is the last three brands purchased - used to reset brand preference if swtiching it persistent
+        self.purchase_history = [self.brand_choice for i in range(3)]
+
     def initialize_ad_preferences(self):
         """Initializes the ad preferences for the agent"""
         self.enable_ads = self.model.enable_ads
@@ -251,6 +254,12 @@ class ConsumerAgent(mesa.Agent):
         except Exception as e:
             print("An unexpected error occurred in set_purchase_behavior:", e)
 
+    def update_brand_preference(self):
+        if len(self.purchase_history) != 3:
+            raise Exception("Purchase history must have exactly 3 elements.")
+        if len(set(self.purchase_history)) == 1:
+            self.brand_preference = self.purchase_history[0]
+
     def purchase(self):
         """
         This method simulates the purchase behavior of the consumer agent.
@@ -285,6 +294,10 @@ class ConsumerAgent(mesa.Agent):
             self.pantry_stock += sum(self.purchased_this_step.values())
         except Exception as e:
             print("An unexpected error occurred in purchase:", e)
+
+        self.purchase_history.pop(0)
+        self.purchase_history.append(self.brand_choice)
+        self.update_brand_preference()
 
     def step(self):
         """Defines the sequence of actions for the agent in each step of the simulation"""

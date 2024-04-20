@@ -54,3 +54,38 @@ def compute_average_price(model: Model) -> float:
     except Exception as e:
         print("An unexpected error occurred in compute_average_price:", e)
     return np.mean(prices)
+
+
+def compute_average_purchase_probability(model: Model) -> Dict[str, float]:
+    """
+    Compute the average purchase probability for each brand in the model.
+
+    Args:
+        model (Model): The model instance.
+
+    Returns:
+        Dict[str, float]: A dictionary where keys are brand names and values are average purchase probabilities.
+
+    Raises:
+        Exception: If an unexpected error occurs.
+    """
+    try:
+        # Initialize a dictionary to store total probabilities for each brand
+        probabilities = {brand: [] for brand in model.brand_list}
+
+        # Iterate over all agents in the model
+        for agent in model.schedule.agents:
+            # Add the agent's purchase probabilities to the total probabilities
+            for brand in model.brand_list:
+                probabilities[brand].append(agent.purchase_probabilities[brand])
+
+        # Compute the average purchase probability for each brand
+        average_probabilities = {
+            brand: np.mean(probs) for brand, probs in probabilities.items()
+        }
+
+        return average_probabilities
+    except Exception as e:
+        print(
+            "An unexpected error occurred in compute_average_purchase_probability:", e
+        )

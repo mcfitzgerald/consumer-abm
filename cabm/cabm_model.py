@@ -8,22 +8,23 @@ from .cabm_agent import ConsumerAgent
 from .model_functions import (
     compute_total_purchases,
     compute_average_price,
+    compute_average_purchase_probability,
 )
 
 # Set up logger
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+# logger = logging.getLogger()
+# logger.setLevel(logging.INFO)
 
-# Create a log file with current date and time
-logfile = datetime.datetime.now().strftime("log_%m%d%y%H%M%p.log")
+# # Create a log file with current date and time
+# logfile = datetime.datetime.now().strftime("log_%m%d%y%H%M%p.log")
 
-# Set up file handler for logger
-file_handler = logging.FileHandler(logfile)
-file_handler_format = (
-    "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(levelname)s: %(message)s"
-)
-file_handler.setFormatter(logging.Formatter(file_handler_format))
-logger.addHandler(file_handler)
+# # Set up file handler for logger
+# file_handler = logging.FileHandler(logfile)
+# file_handler_format = (
+#     "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(levelname)s: %(message)s"
+# )
+# file_handler.setFormatter(logging.Formatter(file_handler_format))
+# logger.addHandler(file_handler)
 
 
 class ConsumerModel(mesa.Model):
@@ -86,6 +87,7 @@ class ConsumerModel(mesa.Model):
             model_reporters={
                 "Total_Purchases": compute_total_purchases,
                 "Average_Product_Price": compute_average_price,
+                "Average_Purchase_Probability": compute_average_purchase_probability,
                 "Week_Number": "week_number",
             },
             agent_reporters={
