@@ -1,2 +1,11 @@
-2-15-24 :: handle exception where ad dict is empty; could be made into the ads off toggle too
-3-23-24 :: right now consumer doesn't weigh pricing between brands, only within brands -- need to change; IDEA - add price point function to purchase probabilities (use log softening) 
+02-15-24 :: handle exception where ad dict is empty; could be made into the ads off toggle too
+05-02-24 :: Components of purchase history functions are hardcoded -- make configurable and add to config file, also add option to turn off
+05-05-24 :: Add capability to add/remove agents during simulation (people entering and exiting market)
+           Example code:
+           def step(self):
+             # Add a new agent at each step
+             new_agent = ConsumerAgent(self.next_id(), self)
+             self.schedule.add(new_agent)
+
+5-05-24 :: remove depth and frequency attributes from agent class config logic and config file
+5-06-24 :: have not observed "buy none" behavior - suggests that other logic prevents this or consumer always buys, which is suspect

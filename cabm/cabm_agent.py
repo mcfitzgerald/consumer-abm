@@ -110,6 +110,7 @@ class ConsumerAgent(mesa.Agent):
         self.brand_choice = self.brand_preference
 
         # Purchase history is the last three brands purchased - used to reset brand preference if swtiching it persistent
+        # NEED TO DE-HARDCODE this
         self.purchase_history = [self.brand_choice for i in range(3)]
 
     def initialize_ad_preferences(self):
