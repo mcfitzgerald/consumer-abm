@@ -101,7 +101,6 @@ class ConsumerModel(mesa.Model):
                 "Ad_Decay_Factor": "ad_decay_factor",
                 "Ad_Channel_Preference": "ad_channel_preference",
                 "Adstock": "adstock",
-                "Ad_Sensitivity": "ad_sensitivity",
                 "Pantry_Min": "pantry_min",
                 "Pantry_Max": "pantry_max",
                 "Pantry_Stock": "pantry_stock",

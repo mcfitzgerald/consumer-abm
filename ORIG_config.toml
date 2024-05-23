@@ -21,7 +21,7 @@ ad_decay_factor = 2.0 # the higher the number, the faster the adstock decay, thi
 ad_decay_override = 0
 
 # Purchase loyalty - upper and lower bounds for beta distribution over agents
-loyalty_alpha = 20
+loyalty_alpha = 50
 loyalty_beta = 2
 loyalty_rate_override = 0
 
@@ -43,7 +43,7 @@ base_product_price = 5.0
 [brands.A.promotions]
 promo_depths=[0.25, 0.5] # DEPRECATED - NEED TO REMOVE FROM CONFIG CODE
 promo_frequencies=[0.6, 0.3, 0.1] # DEPRECATED - NEED TO REMOVE FROM CONFIG CODE
-promo_calendar = {spring_sale = 0.0, back_to_school = 0.0}
+promo_calendar = {spring_sale = 0.25, back_to_school = 0.5}
 [brands.A.advertising]
 budget = 1000000.0
 channels = ["TV", "Web"]
@@ -57,7 +57,7 @@ base_product_price = 5.0
 [brands.B.promotions]
 promo_depths=[0.25, 0.5] # DEPRECATED - NEED TO REMOVE FROM CONFIG CODE
 promo_frequencies=[0.5, 0.25, 0.25] # DEPRECATED - NEED TO REMOVE FROM CONFIG CODE
-promo_calendar = {holiday_season = 0.0, summer_sale = 0.0}
+promo_calendar = {holiday_season = 0.5, summer_sale = 0.25}
 [brands.B.advertising]
 budget = 600000.0
 channels = ["TV", "Web"]
