@@ -27,8 +27,7 @@ loyalty_rate_override = 0
 
 [brands]
 # Base product price - the sticker price of a product
-# Promo depths - the percentage of the base price that a promo reduces the price by
-# Promo frequencies - the percentage of the time that a promo is offered
+# Promo calendar - the period (campaign) and percentage of the base price that a promo reduces the price by
 # Current market share - the percentage of the market that a brand currently has
 # Advertising budget - the amount of money spent on advertising
 # Advertising channels - the channels that a brand advertises on
@@ -41,8 +40,6 @@ name = "Brand A"
 current_market_share = 0.7
 base_product_price = 5.0
 [brands.A.promotions]
-promo_depths=[0.25, 0.5] # DEPRECATED - NEED TO REMOVE FROM CONFIG CODE
-promo_frequencies=[0.6, 0.3, 0.1] # DEPRECATED - NEED TO REMOVE FROM CONFIG CODE
 promo_calendar = {spring_sale = 0.0, back_to_school = 0.0}
 [brands.A.advertising]
 budget = 1000000.0
@@ -55,11 +52,9 @@ name = "Brand B"
 current_market_share = 0.3
 base_product_price = 5.0
 [brands.B.promotions]
-promo_depths=[0.25, 0.5] # DEPRECATED - NEED TO REMOVE FROM CONFIG CODE
-promo_frequencies=[0.5, 0.25, 0.25] # DEPRECATED - NEED TO REMOVE FROM CONFIG CODE
 promo_calendar = {holiday_season = 0.0, summer_sale = 0.0}
 [brands.B.advertising]
-budget = 600000.0
+budget = 0.0
 channels = ["TV", "Web"]
 priority = {TV = 20, Web = 80}
 ad_campaigns = {TV = "spring_sale", Web = "holiday_season"}
