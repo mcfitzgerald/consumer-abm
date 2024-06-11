@@ -15,7 +15,7 @@ consumption_rate_override = 0
 # Pantry minimum percent (percent of household size)
 pantry_min_percent = 0.1 # when pantry drops below 10% of household size, consumer must buy to replenish
 
-base_channel_preferences = {TV = 0.40, Web = 0.60} # if using other channels, add them here - must sum to 1
+base_channel_preferences = {TV = 0.20, Web = 0.80} # if using other channels, add them here - must sum to 1
 
 ad_decay_factor = 2.0 # the higher the number, the faster the adstock decay, this just divides the adstock by the number each week
 ad_decay_override = 0
@@ -44,7 +44,7 @@ promo_calendar = {spring_sale = 0.0, back_to_school = 0.0}
 [brands.A.advertising]
 budget = 1000000.0
 channels = ["TV", "Web"]
-priority = {TV = 40, Web = 60}
+priority = {TV = 50, Web = 50}
 ad_campaigns = {TV = "quick_lag_2", Web = "back_to_school"}
 
 [brands.B]
