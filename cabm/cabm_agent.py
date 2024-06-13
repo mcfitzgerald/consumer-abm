@@ -60,7 +60,7 @@ class ConsumerAgent(mesa.Agent):
     step():
         Defines the sequence of actions for the agent in each step of the simulation
     """
-
+    
     def __init__(
         self,
         unique_id: int,
@@ -76,6 +76,7 @@ class ConsumerAgent(mesa.Agent):
         self.initialize_ad_preferences()
         self.initialize_pantry()
         self.initialize_prices()
+        self.add_joint_calendar_properties()
 
     def initialize_household(self):
         """Initializes the household size and consumption rate for the agent"""
@@ -143,6 +144,17 @@ class ConsumerAgent(mesa.Agent):
             0  # fewest number of products needed ot bring stock above pantry min
         )
         self.step_max = 0
+
+    def _create_joint_calendar_property(self, property_name, brand, attribute):
+        def getter(self):
+            return self.model.config.joint_calendar.loc[self.model.week_number, (brand, attribute)]
+        setattr(self.__class__, property_name, property(getter))
+
+    def add_joint_calendar_properties(self):
+        for (brand, attribute) in self.model.config.joint_calendar.columns:
+            property_name = f"{attribute.lower()}_{brand.lower()}"
+            self._create_joint_calendar_property(property_name, brand, attribute)
+
 
     def consume(self):
         """Simulates the consumption of products by the agent"""
