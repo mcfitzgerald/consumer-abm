@@ -152,7 +152,7 @@ class ConsumerAgent(mesa.Agent):
 
     def add_joint_calendar_properties(self):
         for (brand, attribute) in self.model.config.joint_calendar.columns:
-            property_name = f"{attribute.lower()}_{brand.lower()}"
+            property_name = f"{attribute.lower()}_{brand.upper()}"
             self._create_joint_calendar_property(property_name, brand, attribute)
 
 

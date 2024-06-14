@@ -106,7 +106,7 @@ class ConsumerModel(mesa.Model):
         }
 
         for (brand, attribute) in self.config.joint_calendar.columns:
-            property_name = f"{attribute.lower()}_{brand.lower()}"
+            property_name = f"{attribute.lower()}_{brand.upper()}"
             agent_reporters[property_name] = property_name
 
         self.datacollector = mesa.DataCollector(
