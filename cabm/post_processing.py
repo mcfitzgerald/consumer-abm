@@ -120,6 +120,37 @@ def add_total_sales_columns(purchases_df: pd.DataFrame) -> pd.DataFrame:
 
     return purchases_df
 
+def calculate_average_adstock(agent_df):
+    '''
+    Computes average adstock per brand per step from agent level output
+    '''
+    # Identify columns for adstock
+    adstock_columns = [col for col in agent_df.columns if col.startswith('Adstock_')]
+
+    # Initialize a dictionary to store the results
+    average_adstock = {col: [] for col in adstock_columns}
+    dates = []
+    steps = []
+
+    # Iterate over the 'Ad_Stock' column
+    for index, row in agent_df.iterrows():
+        # Append the adstock for each brand to the respective list
+        for col in adstock_columns:
+            average_adstock[col].append(row[col])
+        dates.append(row['Date'])
+        steps.append(index[0])  # Assuming 'Step' is the first level of the index
+
+    # Create a new DataFrame with the average adstock for each brand
+    average_adstock_df = pd.DataFrame({
+        **average_adstock,
+        'Date': dates,
+    })
+
+    # Group by 'Date' and 'Step' and calculate the average adstock
+    average_adstock_df = average_adstock_df.groupby(['Date']).mean().reset_index()
+
+    return average_adstock_df
+
 # Validation
 
 def ensure_float_columns(df, exclude_columns=['Date','Step']):
