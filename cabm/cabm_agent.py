@@ -60,7 +60,7 @@ class ConsumerAgent(mesa.Agent):
     step():
         Defines the sequence of actions for the agent in each step of the simulation
     """
-    
+
     def __init__(
         self,
         unique_id: int,
@@ -147,14 +147,16 @@ class ConsumerAgent(mesa.Agent):
 
     def _create_joint_calendar_property(self, property_name, brand, attribute):
         def getter(self):
-            return self.model.config.joint_calendar.loc[self.model.week_number, (brand, attribute)]
+            return self.model.config.joint_calendar.loc[
+                self.model.week_number, (brand, attribute)
+            ]
+
         setattr(self.__class__, property_name, property(getter))
 
     def add_joint_calendar_properties(self):
-        for (brand, attribute) in self.model.config.joint_calendar.columns:
+        for brand, attribute in self.model.config.joint_calendar.columns:
             property_name = f"{attribute.lower()}_{brand.upper()}"
             self._create_joint_calendar_property(property_name, brand, attribute)
-
 
     def consume(self):
         """Simulates the consumption of products by the agent"""
@@ -297,10 +299,22 @@ class ConsumerAgent(mesa.Agent):
             elif self.purchase_behavior == "buy_maximum":
                 self.purchased_this_step[self.brand_choice] += self.step_max
             elif self.purchase_behavior == "buy_some_or_none":
-                # Include 0 as a possible purchase even if pantry not full
-                self.purchased_this_step[self.brand_choice] += np.random.choice(
-                    list(range(0, (self.step_max + 1)))
-                )
+                adstock_value = self.adstock[self.brand_choice]
+                if self.model.enable_ad_increment:
+                    print("it's incremental!")
+                    if adstock_value > 1:
+                        lower_bound = min(int(math.log10(adstock_value)), self.step_max)
+                        self.purchased_this_step[self.brand_choice] += np.random.choice(
+                            list(range(lower_bound, self.step_max + 1))
+                        )
+                    else:
+                        self.purchased_this_step[self.brand_choice] += np.random.choice(
+                            list(range(0, self.step_max + 1))
+                        )
+                else:
+                    self.purchased_this_step[self.brand_choice] += np.random.choice(
+                        list(range(0, self.step_max + 1))
+                    )
             elif self.purchase_behavior == "buy_none":
                 self.purchased_this_step[self.brand_choice] += 0  # No purchase
             # Update pantry stock

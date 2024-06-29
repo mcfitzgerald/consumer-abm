@@ -54,6 +54,7 @@ class ConsumerModel(mesa.Model):
         config_file: str,
         enable_ads: bool = True,
         enable_pricepoint: bool = True,
+        enable_ad_increment: bool = False,
     ):
         """
         Initialize the ConsumerModel.
@@ -61,8 +62,9 @@ class ConsumerModel(mesa.Model):
         Args:
             N (int): Number of agents.
             config_file (str): Path to the configuration file.
-            enable_ads (bool, optional): Flag to enable ads. Defaults to True.
-            enable_pricepoint (bool, optional): Flag to enable pricepoint. Defaults to True.
+            enable_ads (bool, optional): Flag to enable impact of adstock on purchase probability. Defaults to true.
+            enable_pricepoint (bool, optional): Flag to enable impact of pricepoint on purchase probability. Defaults to True.
+            enable_ad_increment (bool, optional): Flag to enable expanded consumption (incremental purchase) based on advertisting. Defaults to False.
         """
         super().__init__()
 
@@ -75,6 +77,7 @@ class ConsumerModel(mesa.Model):
         self.week_number: int = 1  # Initialize week_number attribute
         self.enable_ads: bool = enable_ads
         self.enable_pricepoint: bool = enable_pricepoint
+        self.enable_ad_increment = enable_ad_increment
         self.brand_list: List[str] = self.config.brand_list
 
         # Create agents
@@ -82,7 +85,7 @@ class ConsumerModel(mesa.Model):
             a: ConsumerAgent = ConsumerAgent(i, self, self.config)
             self.schedule.add(a)
 
-         # Initialize DataCollector with dynamic agent reporters
+        # Initialize DataCollector with dynamic agent reporters
         agent_reporters = {
             "Household_Size": "household_size",
             "Consumption_Rate": "consumption_rate",
@@ -105,7 +108,7 @@ class ConsumerModel(mesa.Model):
             "Step_Max": "step_max",
         }
 
-        for (brand, attribute) in self.config.joint_calendar.columns:
+        for brand, attribute in self.config.joint_calendar.columns:
             property_name = f"{attribute.lower()}_{brand.upper()}"
             agent_reporters[property_name] = property_name
 
