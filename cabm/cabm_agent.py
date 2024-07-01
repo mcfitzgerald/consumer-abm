@@ -301,7 +301,6 @@ class ConsumerAgent(mesa.Agent):
             elif self.purchase_behavior == "buy_some_or_none":
                 adstock_value = self.adstock[self.brand_choice]
                 if self.model.enable_ad_increment:
-                    print("it's incremental!")
                     if adstock_value > 1:
                         lower_bound = min(int(math.log10(adstock_value)), self.step_max)
                         self.purchased_this_step[self.brand_choice] += np.random.choice(

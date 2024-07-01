@@ -42,9 +42,9 @@ base_product_price = 5.0
 [brands.A.promotions]
 promo_calendar = {spring_sale = 0.0, back_to_school = 0.0}
 [brands.A.advertising]
-budget = 100000.0
+budget = 1000000.0
 channels = ["TV", "Web"]
-priority = {TV = 30, Web = 70}
+priority = {TV = 50, Web = 50}
 ad_campaigns = {TV = "quick_lag_2", Web = "back_to_school"}
 
 [brands.B]
