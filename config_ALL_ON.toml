@@ -40,7 +40,7 @@ name = "Brand A"
 current_market_share = 0.7
 base_product_price = 5.0
 [brands.A.promotions]
-promo_calendar = {spring_sale = 0.0, back_to_school = 0.0}
+promo_calendar = {spring_sale = 0.25, back_to_school = 0.5}
 [brands.A.advertising]
 budget = 1000000.0
 channels = ["TV", "Web"]
@@ -52,9 +52,9 @@ name = "Brand B"
 current_market_share = 0.3
 base_product_price = 5.0
 [brands.B.promotions]
-promo_calendar = {holiday_season = 0.0, summer_sale = 0.0}
+promo_calendar = {holiday_season = 0.25, summer_sale = 0.5}
 [brands.B.advertising]
-budget = 0.0
+budget = 75000.0
 channels = ["TV", "Web"]
 priority = {TV = 20, Web = 80}
 ad_campaigns = {TV = "spring_sale", Web = "holiday_season"}
