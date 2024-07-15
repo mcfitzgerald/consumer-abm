@@ -180,3 +180,6 @@ packages.html
 
 # pickle files
 *.pkl
+
+# image exports
+*.png

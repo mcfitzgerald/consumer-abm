@@ -1,0 +1,94 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+Any	ad_calendar.py	/^from typing import Dict, List, Any, Callable, Optional, Tuple$/;"	i
+Any	promo_calendar.py	/^from typing import Dict, List, Any, Tuple$/;"	i
+Callable	ad_calendar.py	/^from typing import Dict, List, Any, Callable, Optional, Tuple$/;"	i
+Configuration	cabm_agent.py	/^from cabm.config_helpers import Configuration$/;"	i
+Configuration	cabm_model.py	/^from .config_helpers import Configuration$/;"	i
+Configuration	config_helpers.py	/^class Configuration:$/;"	c
+ConsumerAgent	cabm_agent.py	/^class ConsumerAgent(mesa.Agent):$/;"	c
+ConsumerAgent	cabm_model.py	/^from .cabm_agent import ConsumerAgent$/;"	i
+ConsumerModel	cabm_model.py	/^class ConsumerModel(mesa.Model):$/;"	c
+Dict	ad_calendar.py	/^from typing import Dict, List, Any, Callable, Optional, Tuple$/;"	i
+Dict	agent_functions.py	/^from typing import List, Dict$/;"	i
+Dict	config_helpers.py	/^from typing import Dict, List$/;"	i
+Dict	model_functions.py	/^from typing import Dict$/;"	i
+Dict	promo_calendar.py	/^from typing import Dict, List, Any, Tuple$/;"	i
+List	ad_calendar.py	/^from typing import Dict, List, Any, Callable, Optional, Tuple$/;"	i
+List	agent_functions.py	/^from typing import List, Dict$/;"	i
+List	cabm_model.py	/^from typing import List$/;"	i
+List	config_helpers.py	/^from typing import Dict, List$/;"	i
+List	promo_calendar.py	/^from typing import Dict, List, Any, Tuple$/;"	i
+Model	model_functions.py	/^from mesa import Model$/;"	i
+Optional	ad_calendar.py	/^from typing import Dict, List, Any, Callable, Optional, Tuple$/;"	i
+Tuple	ad_calendar.py	/^from typing import Dict, List, Any, Callable, Optional, Tuple$/;"	i
+Tuple	promo_calendar.py	/^from typing import Dict, List, Any, Tuple$/;"	i
+__init__	cabm_agent.py	/^    def __init__($/;"	m	class:ConsumerAgent
+__init__	cabm_model.py	/^    def __init__($/;"	m	class:ConsumerModel
+__init__	config_helpers.py	/^    def __init__(self, config: Dict):$/;"	m	class:Configuration
+_create_joint_calendar_property	cabm_agent.py	/^    def _create_joint_calendar_property(self, property_name, brand, attribute):$/;"	m	class:ConsumerAgent
+ad_decay	agent_functions.py	/^def ad_decay(adstock: Dict[str, float], factor: float) -> Dict[str, float]:$/;"	f
+ad_exposure	cabm_agent.py	/^    def ad_exposure(self):$/;"	m	class:ConsumerAgent
+add_date_column	post_processing.py	/^def add_date_column($/;"	f
+add_joint_calendar_properties	cabm_agent.py	/^    def add_joint_calendar_properties(self):$/;"	m	class:ConsumerAgent
+add_total_sales_columns	post_processing.py	/^def add_total_sales_columns($/;"	f
+assign_weights	agent_functions.py	/^def assign_weights(items: List[str], prior_weights: List[float]) -> Dict[str, float]:$/;"	f
+calculate_adstock	agent_functions.py	/^def calculate_adstock($/;"	f
+calculate_average_adstock	post_processing.py	/^def calculate_average_adstock(agent_df):$/;"	f
+calculate_total_purchases	post_processing.py	/^def calculate_total_purchases($/;"	f
+compute_average_price	model_functions.py	/^def compute_average_price(model: Model) -> float:$/;"	f
+compute_average_purchase_probability	model_functions.py	/^def compute_average_purchase_probability(model: Model) -> Dict[str, float]:$/;"	f
+compute_total_purchases	model_functions.py	/^def compute_total_purchases(model: Model) -> Dict[str, int]:$/;"	f
+consume	cabm_agent.py	/^    def consume(self):$/;"	m	class:ConsumerAgent
+datetime	cabm_model.py	/^import datetime$/;"	i
+ensure_float_columns	post_processing.py	/^def ensure_float_columns(df, exclude_columns=["Date", "Step"]):$/;"	f
+generate_brand_ad_channel_map	config_helpers.py	/^def generate_brand_ad_channel_map(brand_list: List[str], config: Dict) -> Dict:$/;"	f
+generate_brand_ad_schedule	ad_calendar.py	/^def generate_brand_ad_schedule($/;"	f
+generate_brand_promo_schedule	promo_calendar.py	/^def generate_brand_promo_schedule($/;"	f
+generate_joint_ad_promo_schedule	config_helpers.py	/^def generate_joint_ad_promo_schedule(brands: List[str], config: Dict) -> pd.DataFrame:$/;"	f
+get_ad_impact_on_purchase_probabilities	agent_functions.py	/^def get_ad_impact_on_purchase_probabilities($/;"	f
+get_current_price	agent_functions.py	/^def get_current_price(week: int, joint_calendar: pd.DataFrame, brand: str) -> float:$/;"	f
+get_pantry_max	agent_functions.py	/^def get_pantry_max(household_size: int, pantry_min: int) -> int:$/;"	f
+get_price_impact_on_purchase_probabilities	agent_functions.py	/^def get_price_impact_on_purchase_probabilities($/;"	f
+getter	cabm_agent.py	/^        def getter(self):$/;"	f	function:ConsumerAgent._create_joint_calendar_property
+initialize_ad_preferences	cabm_agent.py	/^    def initialize_ad_preferences(self):$/;"	m	class:ConsumerAgent
+initialize_brand_preference	cabm_agent.py	/^    def initialize_brand_preference(self):$/;"	m	class:ConsumerAgent
+initialize_household	cabm_agent.py	/^    def initialize_household(self):$/;"	m	class:ConsumerAgent
+initialize_pantry	cabm_agent.py	/^    def initialize_pantry(self):$/;"	m	class:ConsumerAgent
+initialize_prices	cabm_agent.py	/^    def initialize_prices(self):$/;"	m	class:ConsumerAgent
+logging	agent_functions.py	/^import logging$/;"	i
+logging	cabm_agent.py	/^import logging$/;"	i
+logging	cabm_model.py	/^import logging$/;"	i
+magnitude_adjusted_softmax	agent_functions.py	/^def magnitude_adjusted_softmax($/;"	f
+math	agent_functions.py	/^import math$/;"	i
+math	cabm_agent.py	/^import math$/;"	i
+mesa	cabm_agent.py	/^import mesa$/;"	i
+mesa	cabm_model.py	/^import mesa$/;"	i
+np	ad_calendar.py	/^import numpy as np$/;"	i
+np	agent_functions.py	/^import numpy as np$/;"	i
+np	cabm_agent.py	/^import numpy as np$/;"	i
+np	model_functions.py	/^import numpy as np$/;"	i
+pd	ad_calendar.py	/^import pandas as pd$/;"	i
+pd	agent_functions.py	/^import pandas as pd$/;"	i
+pd	config_helpers.py	/^import pandas as pd$/;"	i
+pd	post_processing.py	/^import pandas as pd$/;"	i
+pd	promo_calendar.py	/^import pandas as pd$/;"	i
+prepare_ad_schedule_variables	ad_calendar.py	/^def prepare_ad_schedule_variables($/;"	f
+prepare_promo_schedule_variables	promo_calendar.py	/^def prepare_promo_schedule_variables($/;"	f
+price_exposure	cabm_agent.py	/^    def price_exposure(self):$/;"	m	class:ConsumerAgent
+purchase	cabm_agent.py	/^    def purchase(self):$/;"	m	class:ConsumerAgent
+random	agent_functions.py	/^import random$/;"	i
+sample_beta_min	agent_functions.py	/^def sample_beta_min($/;"	f
+sample_normal_min	agent_functions.py	/^def sample_normal_min($/;"	f
+set_brand_choice	cabm_agent.py	/^    def set_brand_choice(self):$/;"	m	class:ConsumerAgent
+set_purchase_behavior	cabm_agent.py	/^    def set_purchase_behavior(self):$/;"	m	class:ConsumerAgent
+step	cabm_agent.py	/^    def step(self):$/;"	m	class:ConsumerAgent
+step	cabm_model.py	/^    def step(self):$/;"	m	class:ConsumerModel
+toml	cabm_model.py	/^import toml$/;"	i
+update_adstock	agent_functions.py	/^def update_adstock($/;"	f
+update_brand_preference	cabm_agent.py	/^    def update_brand_preference(self):$/;"	m	class:ConsumerAgent
+warnings	agent_functions.py	/^import warnings$/;"	i
