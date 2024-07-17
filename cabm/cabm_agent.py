@@ -53,8 +53,6 @@ class ConsumerAgent(mesa.Agent):
         Adjusts the purchase probabilities based on price impact
     set_brand_choice():
         Updates the brand choice based on purchase probabilities
-    set_purchase_behavior():
-        Determines the purchase behavior of the agent based on current price and pantry stock
     purchase():
         Simulates the purchase behavior of the agent
     step():
@@ -133,13 +131,13 @@ class ConsumerAgent(mesa.Agent):
         )  # Forces must-buy when stock drops percentage of household size
         self.pantry_max = get_pantry_max(self.household_size, self.pantry_min)
         self.pantry_stock = self.pantry_max  # Start with a fully stocked pantry
+        self.units_to_purchase = 0
         self.purchased_this_step = {brand: 0 for brand in self.config.brand_list}
 
     def initialize_prices(self):
         """Initializes the prices for the agent"""
         self.current_price = self.config.brand_base_price[self.brand_choice]
         self.last_product_price = self.config.brand_base_price[self.brand_choice]
-        self.purchase_behavior = "buy_minimum"
         self.step_min = (
             0  # fewest number of products needed ot bring stock above pantry min
         )
@@ -246,84 +244,49 @@ class ConsumerAgent(mesa.Agent):
         logging.debug(f"Purchase probabilities: {self.purchase_probabilities}")
         logging.debug(f"Brand choice: {self.brand_choice}")
 
-    def set_purchase_behavior(self):
-        """Determines the purchase behavior of the agent based on current price and pantry stock"""
+    def get_units_to_purchase(self):
+        """
+        This method simulates the purchase behavior of the consumer agent.
+        It uses a triangle distribution to set the number of units purchased,
+        while respecting the pantry_min and pantry_max constraints.
+        """
         try:
-            self.current_price = get_current_price(
-                self.model.week_number,
-                self.config.joint_calendar,
-                self.brand_choice,
-            )
-            price_dropped = self.current_price < self.last_product_price
+            self.purchased_this_step = {brand: 0 for brand in self.config.brand_list}  # Reset purchase count
 
-            if self.pantry_stock <= self.pantry_min:
-                self.purchase_behavior = (
-                    "buy_maximum" if price_dropped else "buy_minimum"
-                )
-            elif self.pantry_min < self.pantry_stock < self.pantry_max:
-                self.purchase_behavior = (
-                    "buy_maximum" if price_dropped else "buy_some_or_none"
-                )
-            elif self.pantry_stock >= self.pantry_max:
-                self.purchase_behavior = "buy_none"
+            # Determine the minimum and maximum possible purchases for the step
+            self.step_min = max(0, math.ceil(self.pantry_min - self.pantry_stock))
+            self.step_max = max(0, math.floor(self.pantry_max - self.pantry_stock))
+
+            if self.step_min > self.step_max:
+                # If step_min is greater than step_max, set both to 0
+                self.step_min = self.step_max = 0
+
+            if self.step_max > 0:
+                if self.step_min == self.step_max:
+                    # If min and max are the same, set units to purchase to that value
+                    self.units_to_purchase = self.step_min
+                else:
+                    # Ensure mode is between step_min and step_max
+                    mode = self.step_min + (self.step_max - self.step_min) / 2
+                    self.units_to_purchase = int(np.random.triangular(self.step_min, mode, self.step_max))
         except Exception as e:
-            print("An unexpected error occurred in set_purchase_behavior:", e)
+            print("An unexpected error occurred in purchase:", e)
+                
+    def update_purchased_this_step(self):
+        self.purchased_this_step[self.brand_choice] = self.units_to_purchase
+        self.pantry_stock += self.units_to_purchase
 
     def update_brand_preference(self):
         if len(self.purchase_history) != 3:
             raise Exception("Purchase history must have exactly 3 elements.")
         if len(set(self.purchase_history)) == 1:
             self.brand_preference = self.purchase_history[0]
-
-    def purchase(self):
-        """
-        This method simulates the purchase behavior of the consumer agent.
-        It first resets the purchase count for the current step.
-        Then, it determines the minimum and maximum possible purchases for the step based on the current pantry stock.
-        Depending on the purchase behavior, it updates the purchase count and the pantry stock.
-        """
-        try:
-            self.purchased_this_step = {
-                brand: 0 for brand in self.config.brand_list
-            }  # Reset purchase count
-            # Determine purchase needed this step to maintain pantry_min or above
-            if self.pantry_stock <= self.pantry_min:
-                self.step_min = math.ceil(self.pantry_min - self.pantry_stock)
-            else:
-                self.step_min = 0
-            # Set max possible purchase for step
-            self.step_max = math.floor(self.pantry_max - self.pantry_stock)
-            # Update purchase count based on purchase behavior
-            if self.purchase_behavior == "buy_minimum":
-                self.purchased_this_step[self.brand_choice] += self.step_min
-            elif self.purchase_behavior == "buy_maximum":
-                self.purchased_this_step[self.brand_choice] += self.step_max
-            elif self.purchase_behavior == "buy_some_or_none":
-                adstock_value = self.adstock[self.brand_choice]
-                if self.model.enable_ad_increment:
-                    if adstock_value > 1:
-                        lower_bound = min(int(math.log10(adstock_value)), self.step_max)
-                        self.purchased_this_step[self.brand_choice] += np.random.choice(
-                            list(range(lower_bound, self.step_max + 1))
-                        )
-                    else:
-                        self.purchased_this_step[self.brand_choice] += np.random.choice(
-                            list(range(0, self.step_max + 1))
-                        )
-                else:
-                    self.purchased_this_step[self.brand_choice] += np.random.choice(
-                        list(range(0, self.step_max + 1))
-                    )
-            elif self.purchase_behavior == "buy_none":
-                self.purchased_this_step[self.brand_choice] += 0  # No purchase
-            # Update pantry stock
-            self.pantry_stock += sum(self.purchased_this_step.values())
-        except Exception as e:
-            print("An unexpected error occurred in purchase:", e)
-
+    
+    def update_purchase_history_and_preference(self):
         self.purchase_history.pop(0)
         self.purchase_history.append(self.brand_choice)
         self.update_brand_preference()
+
 
     def step(self):
         """Defines the sequence of actions for the agent in each step of the simulation"""
@@ -333,5 +296,6 @@ class ConsumerAgent(mesa.Agent):
         if self.model.enable_pricepoint:
             self.price_exposure()
         self.set_brand_choice()
-        self.set_purchase_behavior()
-        self.purchase()
+        self.get_units_to_purchase()
+        self.update_purchased_this_step()
+        self.update_purchase_history_and_preference()

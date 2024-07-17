@@ -103,7 +103,6 @@ class ConsumerModel(mesa.Model):
             "Purchased_This_Step": "purchased_this_step",
             "Current_Price": "current_price",
             "Last_Product_Price": "last_product_price",
-            "Purchase_Behavior": "purchase_behavior",
             "Step_Min": "step_min",
             "Step_Max": "step_max",
         }
