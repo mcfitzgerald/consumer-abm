@@ -63,7 +63,7 @@ class ConsumerModel(mesa.Model):
             N (int): Number of agents.
             config_file (str): Path to the configuration file.
             enable_ads (bool, optional): Flag to enable impact of adstock on purchase probability. Defaults to true.
-            enable_pricepoint (bool, optional): Flag to enable impact of pricepoint on purchase probability. Defaults to True.
+            enable_compare_brand_prices (bool, optional): Flag to enable impact of pricepoint on purchase probability. Defaults to True.
             enable_ad_increment (bool, optional): Flag to enable expanded consumption (incremental purchase) based on advertisting. Defaults to False.
         """
         super().__init__()
@@ -76,7 +76,7 @@ class ConsumerModel(mesa.Model):
         self.schedule: mesa.time.RandomActivation = mesa.time.RandomActivation(self)
         self.week_number: int = 1  # Initialize week_number attribute
         self.enable_ads: bool = enable_ads
-        self.enable_pricepoint: bool = enable_pricepoint
+        self.enable_compare_brand_prices: bool = enable_compare_brand_prices
         self.enable_ad_increment = enable_ad_increment
         self.brand_list: List[str] = self.config.brand_list
 

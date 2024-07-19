@@ -203,7 +203,7 @@ class ConsumerAgent(mesa.Agent):
         except Exception as e:
             print(f"An unexpected error occurred in ad_exposure: {e}")
 
-    def price_exposure(self):
+    def compare_brand_prices(self):
         """
         This function adjusts the purchase probabilities based on price impact.
         It first calculates the price impact probabilities, then adjusts the purchase probabilities accordingly.
@@ -251,7 +251,9 @@ class ConsumerAgent(mesa.Agent):
         while respecting the pantry_min and pantry_max constraints.
         """
         try:
-            self.purchased_this_step = {brand: 0 for brand in self.config.brand_list}  # Reset purchase count
+            self.purchased_this_step = {
+                brand: 0 for brand in self.config.brand_list
+            }  # Reset purchase count
 
             # Determine the minimum and maximum possible purchases for the step
             self.step_min = max(0, math.ceil(self.pantry_min - self.pantry_stock))
@@ -268,10 +270,12 @@ class ConsumerAgent(mesa.Agent):
                 else:
                     # Ensure mode is between step_min and step_max
                     mode = self.step_min + (self.step_max - self.step_min) / 2
-                    self.units_to_purchase = int(np.random.triangular(self.step_min, mode, self.step_max))
+                    self.units_to_purchase = int(
+                        np.random.triangular(self.step_min, mode, self.step_max)
+                    )
         except Exception as e:
             print("An unexpected error occurred in purchase:", e)
-                
+
     def update_purchased_this_step(self):
         self.purchased_this_step[self.brand_choice] = self.units_to_purchase
         self.pantry_stock += self.units_to_purchase
@@ -281,12 +285,11 @@ class ConsumerAgent(mesa.Agent):
             raise Exception("Purchase history must have exactly 3 elements.")
         if len(set(self.purchase_history)) == 1:
             self.brand_preference = self.purchase_history[0]
-    
+
     def update_purchase_history_and_preference(self):
         self.purchase_history.pop(0)
         self.purchase_history.append(self.brand_choice)
         self.update_brand_preference()
-
 
     def step(self):
         """Defines the sequence of actions for the agent in each step of the simulation"""
@@ -294,7 +297,7 @@ class ConsumerAgent(mesa.Agent):
         if self.model.enable_ads:
             self.ad_exposure()
         if self.model.enable_pricepoint:
-            self.price_exposure()
+            self.compare_brand_prices()
         self.set_brand_choice()
         self.get_units_to_purchase()
         self.update_purchased_this_step()
