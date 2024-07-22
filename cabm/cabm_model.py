@@ -39,7 +39,7 @@ class ConsumerModel(mesa.Model):
         schedule (mesa.time.RandomActivation): The schedule of agent activation.
         week_number (int): The current week number in the simulation.
         enable_ads (bool): Flag to enable ads.
-        enable_pricepoint (bool): Flag to enable pricepoint.
+        compare_brand_prices (bool): Flag to enable pricepoint.
         brand_list (List[str]): List of available brands in the market.
         datacollector (mesa.DataCollector): Data collector to collect model and agent level data.
 
@@ -53,7 +53,7 @@ class ConsumerModel(mesa.Model):
         N: int,
         config_file: str,
         enable_ads: bool = True,
-        enable_pricepoint: bool = True,
+        compare_brand_prices: bool = True,
         enable_ad_increment: bool = False,
     ):
         """
@@ -76,7 +76,7 @@ class ConsumerModel(mesa.Model):
         self.schedule: mesa.time.RandomActivation = mesa.time.RandomActivation(self)
         self.week_number: int = 1  # Initialize week_number attribute
         self.enable_ads: bool = enable_ads
-        self.enable_compare_brand_prices: bool = enable_compare_brand_prices
+        self.compare_brand_prices: bool = compare_brand_prices
         self.enable_ad_increment = enable_ad_increment
         self.brand_list: List[str] = self.config.brand_list
 

@@ -74,6 +74,19 @@ def sample_beta_min(
     return sample
 
 
+def logistic_function(x):
+    """
+    Logistic function to map any real-valued number into the range (0, 1).
+
+    Parameters:
+    x (float): The input value.
+
+    Returns:
+    float: The output of the logistic function.
+    """
+    return 1 / (1 + math.exp(-x))
+
+
 def magnitude_adjusted_softmax(
     x: np.ndarray,
     log_transform: bool = True,
@@ -364,6 +377,25 @@ def get_ad_impact_on_purchase_probabilities(
 # PRICE IMPACT FUNCTIONS
 
 
+def get_percent_change_in_price(reference_price, current_price):
+    """
+    Calculate the percent change between the reference price and the current price.
+
+    Parameters:
+    reference_price (float): The reference price.
+    current_price (float): The current price.
+
+    Returns:
+    float: The percent change expressed as a decimal.
+    """
+    if reference_price == 0:
+        raise ValueError("Reference price cannot be zero.")
+
+    difference = current_price - reference_price
+    percent_change = difference / reference_price
+    return percent_change
+
+
 def get_current_price(week: int, joint_calendar: pd.DataFrame, brand: str) -> float:
     """
     This function retrieves the current price of a specific brand in a given week from the joint calendar.
@@ -381,7 +413,48 @@ def get_current_price(week: int, joint_calendar: pd.DataFrame, brand: str) -> fl
     return price
 
 
-def get_price_impact_on_purchase_probabilities(
+def get_probability_of_change_in_units_purchased_due_to_price(
+    reference_price,
+    current_price,
+    sensitivity_increase=5,
+    sensitivity_decrease=10,
+    threshold=0.01,
+):
+    """
+    Return the probability that an agent will purchase more or fewer units based on the price change.
+
+    Parameters:
+    reference_price (float): The reference price.
+    current_price (float): The current price.
+    sensitivity_increase (float): The sensitivity factor for price increases.
+    sensitivity_decrease (float): The sensitivity factor for price decreases.
+    threshold (float): The threshold around zero percent difference where the probability is zero.
+
+    Returns:
+    float: The probability of purchasing more units (for a price decrease) or fewer units (for a price increase).
+    """
+    percent_change = get_percent_change_in_price(reference_price, current_price)
+
+    # Handle the threshold around zero percent difference
+    if abs(percent_change) < threshold:
+        return 0.0
+
+    # Use the logistic function to model the probability
+    if percent_change < 0:
+        # For a price decrease, the probability of purchasing more units increases
+        probability = logistic_function(
+            abs(percent_change) * sensitivity_decrease
+        )  # Adjust the sensitivity with the scaling factor
+    else:
+        # For a price increase, the probability of purchasing fewer units increases
+        probability = logistic_function(
+            abs(percent_change) * sensitivity_increase
+        )  # Adjust the sensitivity with the scaling factor
+
+    return probability
+
+
+def get_price_impact_on_brand_choice_probabilities(
     week_number: int,
     brand_list: List[str],
     joint_calendar: pd.DataFrame,

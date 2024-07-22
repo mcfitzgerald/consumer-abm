@@ -15,7 +15,7 @@ from .agent_functions import (
     ad_decay,
     update_adstock,
     get_ad_impact_on_purchase_probabilities,
-    get_price_impact_on_purchase_probabilities,
+    get_price_impact_on_brand_choice_probabilities,
 )
 
 
@@ -210,7 +210,7 @@ class ConsumerAgent(mesa.Agent):
         Finally, it normalizes the adjusted purchase probabilities so they sum to 1.
         """
         try:
-            price_impact_probabilities = get_price_impact_on_purchase_probabilities(
+            price_impact_probabilities = get_price_impact_on_brand_choice_probabilities(
                 self.model.week_number,
                 self.config.brand_list,
                 self.config.joint_calendar,
@@ -296,7 +296,7 @@ class ConsumerAgent(mesa.Agent):
         self.consume()
         if self.model.enable_ads:
             self.ad_exposure()
-        if self.model.enable_pricepoint:
+        if self.model.compare_brand_prices:
             self.compare_brand_prices()
         self.set_brand_choice()
         self.get_units_to_purchase()
