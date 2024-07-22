@@ -1,3 +1,3 @@
 create similar probability function for incremental/decremental purchase based on adstock
 
-create flexible logic for incrementing based on price and adstock 
+create flexible logic for incrementing based on price and adstock   
