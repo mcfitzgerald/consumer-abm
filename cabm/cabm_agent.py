@@ -10,9 +10,9 @@ from .agent_functions import (
     sample_beta_min,
     get_pantry_max,
     get_current_price,
-    assign_weights,
+    assign_media_channel_weights,
     calculate_adstock,
-    ad_decay,
+    decay_adstock,
     update_adstock,
     get_ad_impact_on_purchase_probabilities,
     get_price_impact_on_brand_choice_probabilities,
@@ -118,7 +118,7 @@ class ConsumerAgent(mesa.Agent):
         self.ad_decay_factor = sample_normal_min(
             self.config.ad_decay_factor, override=self.config.ad_decay_override
         )
-        self.ad_channel_preference = assign_weights(
+        self.ad_channel_preference = assign_media_channel_weights(
             list(self.config.channel_priors.keys()),
             list(self.config.channel_priors.values()),
         )
@@ -176,7 +176,7 @@ class ConsumerAgent(mesa.Agent):
         """
         try:
             # 1) Decay current self.adstock
-            self.adstock = ad_decay(self.adstock, self.ad_decay_factor)
+            self.adstock = decay_adstock(self.adstock, self.ad_decay_factor)
 
             # 2) Calculate this week's adstock
             weekly_adstock = calculate_adstock(
@@ -244,25 +244,27 @@ class ConsumerAgent(mesa.Agent):
         logging.debug(f"Purchase probabilities: {self.purchase_probabilities}")
         logging.debug(f"Brand choice: {self.brand_choice}")
 
-    def get_units_to_purchase(self):
+    def reset_purchased_this_step(self):
+        self.purchased_this_step = {
+            brand: 0 for brand in self.config.brand_list
+        }  # Reset purchase count
+
+    def get_step_min_and_max_units(self):
+        # Determine the minimum and maximum possible purchases for the step
+        self.step_min = max(0, math.ceil(self.pantry_min - self.pantry_stock))
+        self.step_max = max(0, math.floor(self.pantry_max - self.pantry_stock))
+
+        if self.step_min > self.step_max:
+            # If step_min is greater than step_max, set both to 0
+            self.step_min = self.step_max = 0
+
+    def get_baseline_units_to_purchase(self):
         """
         This method simulates the purchase behavior of the consumer agent.
         It uses a triangle distribution to set the number of units purchased,
         while respecting the pantry_min and pantry_max constraints.
         """
         try:
-            self.purchased_this_step = {
-                brand: 0 for brand in self.config.brand_list
-            }  # Reset purchase count
-
-            # Determine the minimum and maximum possible purchases for the step
-            self.step_min = max(0, math.ceil(self.pantry_min - self.pantry_stock))
-            self.step_max = max(0, math.floor(self.pantry_max - self.pantry_stock))
-
-            if self.step_min > self.step_max:
-                # If step_min is greater than step_max, set both to 0
-                self.step_min = self.step_max = 0
-
             if self.step_max > 0:
                 if self.step_min == self.step_max:
                     # If min and max are the same, set units to purchase to that value
@@ -276,7 +278,7 @@ class ConsumerAgent(mesa.Agent):
         except Exception as e:
             print("An unexpected error occurred in purchase:", e)
 
-    def update_purchased_this_step(self):
+    def make_purchase(self):
         self.purchased_this_step[self.brand_choice] = self.units_to_purchase
         self.pantry_stock += self.units_to_purchase
 
@@ -299,6 +301,8 @@ class ConsumerAgent(mesa.Agent):
         if self.model.compare_brand_prices:
             self.compare_brand_prices()
         self.set_brand_choice()
-        self.get_units_to_purchase()
-        self.update_purchased_this_step()
+        self.get_step_min_and_max_units()
+        self.get_baseline_units_to_purchase()
+        self.reset_purchased_this_step()
+        self.make_purchase()
         self.update_purchase_history_and_preference()

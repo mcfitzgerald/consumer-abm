@@ -167,7 +167,9 @@ def get_pantry_max(household_size: int, pantry_min: int) -> int:
     return pantry_max
 
 
-def assign_weights(items: List[str], prior_weights: List[float]) -> Dict[str, float]:
+def assign_media_channel_weights(
+    items: List[str], prior_weights: List[float]
+) -> Dict[str, float]:
     """
     This function is used to randomize media channel preferences for each agent by assigning weights to items.
     The weights are calculated by adding random fluctuations to the prior weights and then normalizing them.
@@ -245,7 +247,7 @@ def calculate_adstock(
     return adstock
 
 
-def ad_decay(adstock: Dict[str, float], factor: float) -> Dict[str, float]:
+def decay_adstock(adstock: Dict[str, float], factor: float) -> Dict[str, float]:
     """
     This function applies a decay factor to the adstock of each brand. If the resulting adstock is less than 1,
     it is set to 1.
@@ -377,6 +379,23 @@ def get_ad_impact_on_purchase_probabilities(
 # PRICE IMPACT FUNCTIONS
 
 
+def get_current_price(week: int, joint_calendar: pd.DataFrame, brand: str) -> float:
+    """
+    This function retrieves the current price of a specific brand in a given week from the joint calendar.
+
+    Parameters:
+    week (int): The week number.
+    joint_calendar (pd.DataFrame): A DataFrame containing the joint calendar.
+    brand (str): The brand for which the price is to be retrieved.
+
+    Returns:
+    float: The price of the brand in the given week.
+    """
+    # Retrieve the price of the brand in the given week from the joint calendar
+    price = joint_calendar.loc[week, (brand, "price")]
+    return price
+
+
 def get_percent_change_in_price(reference_price, current_price):
     """
     Calculate the percent change between the reference price and the current price.
@@ -394,23 +413,6 @@ def get_percent_change_in_price(reference_price, current_price):
     difference = current_price - reference_price
     percent_change = difference / reference_price
     return percent_change
-
-
-def get_current_price(week: int, joint_calendar: pd.DataFrame, brand: str) -> float:
-    """
-    This function retrieves the current price of a specific brand in a given week from the joint calendar.
-
-    Parameters:
-    week (int): The week number.
-    joint_calendar (pd.DataFrame): A DataFrame containing the joint calendar.
-    brand (str): The brand for which the price is to be retrieved.
-
-    Returns:
-    float: The price of the brand in the given week.
-    """
-    # Retrieve the price of the brand in the given week from the joint calendar
-    price = joint_calendar.loc[week, (brand, "price")]
-    return price
 
 
 def get_probability_of_change_in_units_purchased_due_to_price(
