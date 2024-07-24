@@ -16,6 +16,7 @@ from .agent_functions import (
     update_adstock,
     get_ad_impact_on_purchase_probabilities,
     get_price_impact_on_brand_choice_probabilities,
+    get_probability_of_change_in_units_purchased_due_to_price,
 )
 
 
@@ -131,6 +132,10 @@ class ConsumerAgent(mesa.Agent):
         )  # Forces must-buy when stock drops percentage of household size
         self.pantry_max = get_pantry_max(self.household_size, self.pantry_min)
         self.pantry_stock = self.pantry_max  # Start with a fully stocked pantry
+        self.step_min = (
+            0  # fewest number of products needed ot bring stock above pantry min
+        )
+        self.step_max = 0
         self.baseline_units = 0
         self.incremental_promo_units = 0
         self.incremental_ad_units = 0
@@ -140,11 +145,8 @@ class ConsumerAgent(mesa.Agent):
     def initialize_prices(self):
         """Initializes the prices for the agent"""
         self.current_price = self.config.brand_base_price[self.brand_choice]
-        self.last_product_price = self.config.brand_base_price[self.brand_choice]
-        self.step_min = (
-            0  # fewest number of products needed ot bring stock above pantry min
-        )
-        self.step_max = 0
+        # deprecated? #self.last_product_price = self.config.brand_base_price[self.brand_choice]
+        self.price_change = "no_price_change"
 
     def _create_joint_calendar_property(self, property_name, brand, attribute):
         def getter(self):
@@ -281,8 +283,55 @@ class ConsumerAgent(mesa.Agent):
         except Exception as e:
             print("An unexpected error occurred in purchase:", e)
 
-    def check_price_and_augment_units(self):
-        current_price = get_current_price()
+    def check_price(self):
+        self.current_price = get_current_price(
+            self.model.week_number,
+            self.config.joint_calendar,
+            self.brand_choice,
+        )
+        if self.current_price < self.config.brand_base_price[self.brand_choice]:
+            self.price_change = "price_decrease"
+        elif self.current_price > self.config.brand_base_price[self.brand_choice]:
+            self.price_change = "price_increase"
+        else:
+            self.price_change = "no_price_change"
+
+    def change_units_to_purchase_based_on_price(self):
+        """
+        Uses probability of an incrementing or decrementing event
+        to change baseline units based on price
+        """
+        event_probability = get_probability_of_change_in_units_purchased_due_to_price(
+            self.config.brand_base_price[self.brand_choice],
+            self.current_price,
+            sensitivity_increase=5,  # need to work these into config
+            sensitivity_decrease=10,  # need to work these into config
+            threshold=0.01,  # need to work these into config
+        )
+
+        event_branch = np.random.choice(
+            [True, False], p=[event_probability, 1 - event_probability]
+        )
+
+        if event_branch:
+            if self.price_change == "price_decrease":
+                max_additional_units = self.step_max - self.baseline_units
+                if max_additional_units > 0:
+                    self.incremental_units = np.random.randint(
+                        1, max_additional_units + 1
+                    )
+                else:
+                    self.incremental_units = 0
+            if self.price_change == "price_increase":
+                max_decremental_units = self.baseline_units - self.step_min
+                if max_decremental_units > 0:
+                    self.decremental_units = np.random.randint(
+                        1, max_decremental_units + 1
+                    )
+                else:
+                    self.decremental_units = 0
+            if self.price_change == "no_price_change":
+                return
 
     def make_purchase(self):
         self.purchased_this_step[self.brand_choice] = self.baseline_units
@@ -309,6 +358,8 @@ class ConsumerAgent(mesa.Agent):
         self.set_brand_choice()
         self.get_step_min_and_max_units()
         self.get_baseline_units_to_purchase()
+        self.check_price()
+        self.change_units_to_purchase_based_on_price()
         self.reset_purchased_this_step()
         self.make_purchase()
         self.update_purchase_history_and_preference()
