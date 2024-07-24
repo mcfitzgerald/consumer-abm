@@ -317,11 +317,11 @@ class ConsumerAgent(mesa.Agent):
             if self.price_change == "price_decrease":
                 max_additional_units = self.step_max - self.baseline_units
                 if max_additional_units > 0:
-                    self.incremental_units = np.random.randint(
+                    self.incremental_promo_units = np.random.randint(
                         1, max_additional_units + 1
                     )
                 else:
-                    self.incremental_units = 0
+                    self.incremental_promo_units = 0
             if self.price_change == "price_increase":
                 max_decremental_units = self.baseline_units - self.step_min
                 if max_decremental_units > 0:
@@ -332,10 +332,11 @@ class ConsumerAgent(mesa.Agent):
                     self.decremental_units = 0
             if self.price_change == "no_price_change":
                 return
-
+    
     def make_purchase(self):
-        self.purchased_this_step[self.brand_choice] = self.baseline_units
-        self.pantry_stock += self.baseline_units
+        units_to_purchase = (self.baseline_units + self.incremental_promo_units + self.incremental_ad_units - self.decremental_units)
+        self.purchased_this_step[self.brand_choice] = units_to_purchase
+        self.pantry_stock += units_to_purchase
 
     def update_brand_preference(self):
         if len(self.purchase_history) != 3:
@@ -356,10 +357,10 @@ class ConsumerAgent(mesa.Agent):
         if self.model.compare_brand_prices:
             self.compare_brand_prices()
         self.set_brand_choice()
+        self.reset_purchased_this_step()
         self.get_step_min_and_max_units()
         self.get_baseline_units_to_purchase()
         self.check_price()
         self.change_units_to_purchase_based_on_price()
-        self.reset_purchased_this_step()
         self.make_purchase()
         self.update_purchase_history_and_preference()
