@@ -131,7 +131,10 @@ class ConsumerAgent(mesa.Agent):
         )  # Forces must-buy when stock drops percentage of household size
         self.pantry_max = get_pantry_max(self.household_size, self.pantry_min)
         self.pantry_stock = self.pantry_max  # Start with a fully stocked pantry
-        self.units_to_purchase = 0
+        self.baseline_units = 0
+        self.incremental_promo_units = 0
+        self.incremental_ad_units = 0
+        self.decremental_units = 0
         self.purchased_this_step = {brand: 0 for brand in self.config.brand_list}
 
     def initialize_prices(self):
@@ -268,19 +271,22 @@ class ConsumerAgent(mesa.Agent):
             if self.step_max > 0:
                 if self.step_min == self.step_max:
                     # If min and max are the same, set units to purchase to that value
-                    self.units_to_purchase = self.step_min
+                    self.baseline_units = self.step_min
                 else:
                     # Ensure mode is between step_min and step_max
                     mode = self.step_min + (self.step_max - self.step_min) / 2
-                    self.units_to_purchase = int(
+                    self.baseline_units = int(
                         np.random.triangular(self.step_min, mode, self.step_max)
                     )
         except Exception as e:
             print("An unexpected error occurred in purchase:", e)
 
+    def check_price_and_augment_units(self):
+        current_price = get_current_price()
+
     def make_purchase(self):
-        self.purchased_this_step[self.brand_choice] = self.units_to_purchase
-        self.pantry_stock += self.units_to_purchase
+        self.purchased_this_step[self.brand_choice] = self.baseline_units
+        self.pantry_stock += self.baseline_units
 
     def update_brand_preference(self):
         if len(self.purchase_history) != 3:
