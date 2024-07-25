@@ -112,6 +112,7 @@ class ConsumerAgent(mesa.Agent):
         # Purchase history is the last three brands purchased - used to reset brand preference if swtiching it persistent
         # NEED TO DE-HARDCODE this
         self.purchase_history = [self.brand_choice for i in range(3)]
+        print(f"init value for purchase_history: {self.purchase_history}")
 
     def initialize_ad_preferences(self):
         """Initializes the ad preferences for the agent"""
@@ -332,9 +333,14 @@ class ConsumerAgent(mesa.Agent):
                     self.decremental_units = 0
             if self.price_change == "no_price_change":
                 return
-    
+
     def make_purchase(self):
-        units_to_purchase = (self.baseline_units + self.incremental_promo_units + self.incremental_ad_units - self.decremental_units)
+        units_to_purchase = (
+            self.baseline_units
+            + self.incremental_promo_units
+            + self.incremental_ad_units
+            - self.decremental_units
+        )
         self.purchased_this_step[self.brand_choice] = units_to_purchase
         self.pantry_stock += units_to_purchase
 
@@ -343,10 +349,13 @@ class ConsumerAgent(mesa.Agent):
             raise Exception("Purchase history must have exactly 3 elements.")
         if len(set(self.purchase_history)) == 1:
             self.brand_preference = self.purchase_history[0]
+            print(f"updating brand pref: {self.brand_preference}")
 
     def update_purchase_history_and_preference(self):
         self.purchase_history.pop(0)
+        print(f"popped_history: {self.purchase_history}")
         self.purchase_history.append(self.brand_choice)
+        print(f"new_purch_hist: {self.purchase_history}")
         self.update_brand_preference()
 
     def step(self):

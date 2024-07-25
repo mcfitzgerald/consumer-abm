@@ -105,6 +105,11 @@ class ConsumerModel(mesa.Model):
             "Last_Product_Price": "last_product_price",
             "Step_Min": "step_min",
             "Step_Max": "step_max",
+            "Baseline_Units": "baseline_units",
+            "Incremental_Promo_Units": "incremental_promo_units",
+            "Incremental_Ad_Units": "incremental_ad_units",
+            "Decremental_Units": "decremental_units",
+            "Price_Change": "price_change",
         }
 
         for brand, attribute in self.config.joint_calendar.columns:
