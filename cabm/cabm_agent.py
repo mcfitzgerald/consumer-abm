@@ -109,10 +109,10 @@ class ConsumerAgent(mesa.Agent):
         # Adding a brand choice in addition to preference so that preference remains but choice can change
         self.brand_choice = self.brand_preference
 
-        # Purchase history is the last three brands purchased - used to reset brand preference if swtiching it persistent
+        # Purchase history is the last three brands purchased - used to reset brand preference if switching is persistent
         # NEED TO DE-HARDCODE this
         self.purchase_history = [self.brand_choice for i in range(3)]
-        print(f"init value for purchase_history: {self.purchase_history}")
+        # print(f"init value for purchase_history: {self.purchase_history}")
 
     def initialize_ad_preferences(self):
         """Initializes the ad preferences for the agent"""
@@ -349,13 +349,13 @@ class ConsumerAgent(mesa.Agent):
             raise Exception("Purchase history must have exactly 3 elements.")
         if len(set(self.purchase_history)) == 1:
             self.brand_preference = self.purchase_history[0]
-            print(f"updating brand pref: {self.brand_preference}")
+            # print(f"updating brand pref: {self.brand_preference}")
 
     def update_purchase_history_and_preference(self):
         self.purchase_history.pop(0)
-        print(f"popped_history: {self.purchase_history}")
+        # print(f"popped_history: {self.purchase_history}")
         self.purchase_history.append(self.brand_choice)
-        print(f"new_purch_hist: {self.purchase_history}")
+        # print(f"new_purch_hist: {self.purchase_history}")
         self.update_brand_preference()
 
     def step(self):
