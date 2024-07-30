@@ -91,6 +91,7 @@ def magnitude_adjusted_softmax(
     x: np.ndarray,
     log_transform: bool = True,
     inverse: bool = False,
+    magnitude_adjusted_temperature = True,
 ) -> np.ndarray:
     """
     Compute softmax values for each set of scores in x, with adjustments for magnitude.
@@ -109,8 +110,11 @@ def magnitude_adjusted_softmax(
             return np.full(x.shape, 1.0 / x.size)
 
         # Set temperature relative to max value in x. This is done before the overflow prevention step
-        temperature = max(1, np.floor(np.log(np.max(x))))
-        logging.debug(f"Temperature for softmax calculation: {temperature}")
+        if magnitude_adjusted_temperature:
+            temperature = max(1, np.floor(np.log(np.max(x))))
+            logging.debug(f"Temperature for softmax calculation: {temperature}")
+        else:
+            temperature = 1
 
         # If log_transform is True, apply log transformation to x
         if log_transform:
