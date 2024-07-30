@@ -144,8 +144,21 @@ class Configuration:
         self.ad_decay_factor = config["household"]["ad_decay_factor"]
         self.joint_calendar = generate_joint_ad_promo_schedule(self.brand_list, config)
         self.brand_channel_map = generate_brand_ad_channel_map(self.brand_list, config)
+        self.price_increase_sensitivity = config["household"][
+            "price_increase_sensitivity"
+        ]
+        self.price_decrease_sensitivity = config["household"][
+            "price_decrease_sensitivity"
+        ]
+        self.price_threshold = config["household"]["price_threshold"]
         self.loyalty_alpha = config["household"]["loyalty_alpha"]
         self.loyalty_beta = config["household"]["loyalty_beta"]
+        self.purchase_history_range_lower = config["household"][
+            "purchase_history_range_lower"
+        ]
+        self.purchase_history_range_upper = config["household"][
+            "purchase_history_range_upper"
+        ]
         self.channel_set = set(
             channel
             for channels in self.brand_channel_map.values()

@@ -423,6 +423,8 @@ def get_probability_of_change_in_units_purchased_due_to_price(
     threshold=0.01,
 ):
     """
+    This is the price elasticity function
+
     Return the probability that an agent will purchase more or fewer units based on the price change.
 
     Parameters:

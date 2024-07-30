@@ -110,9 +110,13 @@ class ConsumerAgent(mesa.Agent):
         self.brand_choice = self.brand_preference
 
         # Purchase history is the last three brands purchased - used to reset brand preference if switching is persistent
-        # NEED TO DE-HARDCODE this
-        self.purchase_history = [self.brand_choice for i in range(3)]
-        # print(f"init value for purchase_history: {self.purchase_history}")
+        self.purchase_history_window_length = np.random.uniform(
+            self.config.purchase_history_range_lower,
+            self.config.purchase_history_range_upper,
+        )
+        self.purchase_history = [
+            self.brand_choice for i in range(self.purchase_history_window_length)
+        ]
 
     def initialize_ad_preferences(self):
         """Initializes the ad preferences for the agent"""
@@ -148,6 +152,9 @@ class ConsumerAgent(mesa.Agent):
         self.current_price = self.config.brand_base_price[self.brand_choice]
         # deprecated? #self.last_product_price = self.config.brand_base_price[self.brand_choice]
         self.price_change = "no_price_change"
+        self.price_increase_sensitivity = sample_normal_min(self.config.price_increase_sensitivity)
+        self.price_decrease_sensitivity = sample_normal_min(self.config.price_decrease_sensitivity)
+        self.price_threshold = self.config.price_threshold
 
     def _create_joint_calendar_property(self, property_name, brand, attribute):
         def getter(self):
@@ -305,9 +312,9 @@ class ConsumerAgent(mesa.Agent):
         event_probability = get_probability_of_change_in_units_purchased_due_to_price(
             self.config.brand_base_price[self.brand_choice],
             self.current_price,
-            sensitivity_increase=5,  # need to work these into config
-            sensitivity_decrease=10,  # need to work these into config
-            threshold=0.01,  # need to work these into config
+            sensitivity_increase = self.price_increase_sensitivity, 
+            sensitivity_decrease = self.price_decrease_sensitivity, 
+            threshold = self.price_threshold, 
         )
 
         event_branch = np.random.choice(
@@ -345,8 +352,11 @@ class ConsumerAgent(mesa.Agent):
         self.pantry_stock += units_to_purchase
 
     def update_brand_preference(self):
-        if len(self.purchase_history) != 3:
-            raise Exception("Purchase history must have exactly 3 elements.")
+        if len(self.purchase_history) != self.purchase_history_window_length:
+            raise Exception(
+                f"Purchase history must have {self.purchase_history_window_length
+                                              } elements."
+            )
         if len(set(self.purchase_history)) == 1:
             self.brand_preference = self.purchase_history[0]
             # print(f"updating brand pref: {self.brand_preference}")

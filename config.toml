@@ -25,6 +25,16 @@ loyalty_alpha = 20
 loyalty_beta = 2
 loyalty_rate_override = 0
 
+# Purchase history window range - after x purchases of brand y, brand preference is set to y
+purchase_history_range_lower = 3
+purchase_history_range_upper = 6 # uses python range so will be n-1
+
+
+# Price elasticity config mean values - via get_probability_of_change_in_units_purchased_due_to_price()
+price_increase_sensitivity = 5
+price_decrease_sensitivity = 10
+price_threshold = 0.01
+
 [brands]
 # Base product price - the sticker price of a product
 # Promo calendar - the period (campaign) and percentage of the base price that a promo reduces the price by

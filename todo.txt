@@ -6,6 +6,6 @@ create baseline_units attribute and then price_incremental and ad_incremental at
 
 check and validate method flow on step
 
-THE BRAND PREFERENCE HISTORY IS BROKEN AND CAUSES STRANGE BEHAVIOR
+THE BRAND PREFERENCE HISTORY IS BROKEN AND CAUSES STRANGE BEHAVIOR -- UPDATE - it's not, i left a variable out of the  model declaration (enable_ads = False)
 
 add readme for running the model somewhere in the code docs
