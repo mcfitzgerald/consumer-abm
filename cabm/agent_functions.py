@@ -111,7 +111,7 @@ def magnitude_adjusted_softmax(
 
         # Set temperature relative to max value in x. This is done before the overflow prevention step
         if magnitude_adjusted_temperature:
-            temperature = max(1, np.floor(np.log(np.max(x))))
+            temperature = max(1, np.log(np.max(x)))
             logging.debug(f"Temperature for softmax calculation: {temperature}")
         else:
             temperature = 1
