@@ -91,7 +91,7 @@ def magnitude_adjusted_softmax(
     x: np.ndarray,
     log_transform: bool = True,
     inverse: bool = False,
-    magnitude_adjusted_temperature = True,
+    magnitude_adjusted_temperature=True,
 ) -> np.ndarray:
     """
     Compute softmax values for each set of scores in x, with adjustments for magnitude.
@@ -311,6 +311,32 @@ def update_adstock(
         print(f"An unexpected error occurred: {e}")
     # Return the updated adstock dictionary
     return updated_adstock
+
+
+def get_probability_of_change_in_units_purchased_due_to_adstock(
+    adstock: float,
+    sensitivity: float = 5,
+    threshold: float = 0.01,
+) -> float:
+    """
+    This function calculates the probability of an additional purchase based on the adstock value.
+
+    Parameters:
+    adstock (float): The adstock value.
+    sensitivity (float): The sensitivity factor for adstock. Default is 5.
+    threshold (float): The threshold below which the probability is zero. Default is 0.01.
+
+    Returns:
+    float: The probability of an additional purchase.
+    """
+    # Handle the threshold below which the probability is zero
+    if adstock < threshold:
+        return 0.0
+
+    # Use the logistic function to model the probability
+    probability = logistic_function(adstock * sensitivity)
+
+    return probability
 
 
 def get_ad_impact_on_purchase_probabilities(
