@@ -144,6 +144,8 @@ class Configuration:
         self.ad_decay_factor = config["household"]["ad_decay_factor"]
         self.joint_calendar = generate_joint_ad_promo_schedule(self.brand_list, config)
         self.brand_channel_map = generate_brand_ad_channel_map(self.brand_list, config)
+        self.adstock_incremental_sensitivity = config["household"]["adstock_incremental_sensitivty"]
+        self.adstock_incremental_midpoint = config["household"]["adstock_incremental_midpoint"]
         self.price_increase_sensitivity = config["household"][
             "price_increase_sensitivity"
         ]

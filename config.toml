@@ -19,6 +19,8 @@ base_channel_preferences = {TV = 0.20, Web = 0.80} # if using other channels, ad
 
 ad_decay_factor = 2.0 # the higher the number, the faster the adstock decay, this just divides the adstock by the number each week
 ad_decay_override = 0
+adstock_increment_sensitivty = 1.0 # controls how steep probability curve is that agent will purchase incremental units
+adstock_increment_midpoint = 1000.0 # adstock level at which there is 50% chance agent will purchase incremental units
 
 # Purchase loyalty - upper and lower bounds for beta distribution over agents
 loyalty_alpha = 20

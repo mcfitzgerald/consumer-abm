@@ -17,6 +17,7 @@ from .agent_functions import (
     get_ad_impact_on_purchase_probabilities,
     get_price_impact_on_brand_choice_probabilities,
     get_probability_of_change_in_units_purchased_due_to_price,
+    get_probability_of_change_in_units_purchased_due_to_adstock,
 )
 
 
@@ -129,6 +130,8 @@ class ConsumerAgent(mesa.Agent):
             list(self.config.channel_priors.values()),
         )
         self.adstock = {i: 0 for i in self.config.brand_list}
+        self.adstock_incremental_sensitivity = sample_normal_min(self.config.adstock_incremental_sensitivity)
+        self.adstock_incremental_midpoint = sample_normal_min(self.config.adstock_incremental_midpoint, std_dev=(self.config.adstock_incremental_midpoint/10.0))
 
     def initialize_pantry(self):
         """Initializes the pantry for the agent"""
@@ -340,7 +343,33 @@ class ConsumerAgent(mesa.Agent):
                     self.decremental_units = 0
             if self.price_change == "no_price_change":
                 return
+            
+    def change_units_to_purchase_based_on_adstock(self):
+        """
+        Uses probability of an incrementing event
+        to change baseline units based on price
+        """
+        event_probability = get_probability_of_change_in_units_purchased_due_to_adstock(
+            self.adstock[self.brand_choice],
+            self.adstock_incremental_sensitivity,
+            self.adstock_incremental_midpoint,
+        )
 
+        event_branch = np.random.choice(
+            [True, False], p=[event_probability, 1 - event_probability]
+        )
+
+        if event_branch:
+            max_additional_units = self.step_max - self.baseline_units
+            if max_additional_units > 0:
+                self.incremental_ad_units = np.random.randint(
+                    1, max_additional_units + 1
+                )
+            else:
+                self.incremental_ad_units = 0
+
+    # NOTE - change the logic below to make sure the sum doesn't violate max using a try block, if it does, limit to max and flip a coin to subtract difference from ad or promo but mark there was adjustment
+    
     def make_purchase(self):
         units_to_purchase = (
             self.baseline_units
