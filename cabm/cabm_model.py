@@ -52,9 +52,10 @@ class ConsumerModel(mesa.Model):
         self,
         N: int,
         config_file: str,
-        enable_ads: bool = True,
-        compare_brand_prices: bool = True,
+        enable_ads: bool = False,
+        compare_brand_prices: bool = False,
         enable_ad_increment: bool = False,
+        enable_elasticity: bool = False,
     ):
         """
         Initialize the ConsumerModel.
@@ -78,6 +79,7 @@ class ConsumerModel(mesa.Model):
         self.enable_ads: bool = enable_ads
         self.compare_brand_prices: bool = compare_brand_prices
         self.enable_ad_increment = enable_ad_increment
+        self.enable_elasticity = enable_elasticity
         self.brand_list: List[str] = self.config.brand_list
 
         # Create agents

@@ -74,7 +74,7 @@ def sample_beta_min(
     return sample
 
 
-def logistic_function(x):
+def logistic_function(x: float) -> float:
     """
     Logistic function to map any real-valued number into the range (0, 1).
 
@@ -330,7 +330,9 @@ def get_probability_of_change_in_units_purchased_due_to_adstock(
     float: The probability of an additional purchase.
     """
     # Use the logistic function to model the probability
-    probability = 1 / (1 + np.exp(-sensitivity * (np.log10(adstock) - np.log10(midpoint))))
+    probability = 1 / (
+        1 + np.exp(-sensitivity * (np.log10(adstock) - np.log10(midpoint)))
+    )
 
     return probability
 
@@ -422,16 +424,19 @@ def get_current_price(week: int, joint_calendar: pd.DataFrame, brand: str) -> fl
     return price
 
 
-def get_percent_change_in_price(reference_price, current_price):
+def get_percent_change_in_price(reference_price: float, current_price: float) -> float:
     """
     Calculate the percent change between the reference price and the current price.
 
-    Parameters:
-    reference_price (float): The reference price.
-    current_price (float): The current price.
+    Args:
+        reference_price (float): The initial price to compare against.
+        current_price (float): The current price to compare with the reference price.
 
     Returns:
-    float: The percent change expressed as a decimal.
+        float: The percent change expressed as a decimal.
+
+    Raises:
+        ValueError: If the reference price is zero, as percent change cannot be calculated.
     """
     if reference_price == 0:
         raise ValueError("Reference price cannot be zero.")
@@ -442,23 +447,24 @@ def get_percent_change_in_price(reference_price, current_price):
 
 
 def get_probability_of_change_in_units_purchased_due_to_price(
-    reference_price,
-    current_price,
-    sensitivity_increase=5,
-    sensitivity_decrease=10,
-    threshold=0.01,
-):
+    reference_price: float,
+    current_price: float,
+    sensitivity_increase: float = 5,
+    sensitivity_decrease: float = 10,
+    threshold: float = 0.01,
+) -> float:
     """
-    This is the price elasticity function
+    Calculate the probability of a change in units purchased based on the price change.
 
-    Return the probability that an agent will purchase more or fewer units based on the price change.
+    This function models price elasticity, returning the probability that an agent will purchase more or fewer units
+    based on the change in price. It uses a logistic function to determine the probability.
 
     Parameters:
     reference_price (float): The reference price.
     current_price (float): The current price.
-    sensitivity_increase (float): The sensitivity factor for price increases.
-    sensitivity_decrease (float): The sensitivity factor for price decreases.
-    threshold (float): The threshold around zero percent difference where the probability is zero.
+    sensitivity_increase (float, optional): The sensitivity factor for price increases. Default is 5.
+    sensitivity_decrease (float, optional): The sensitivity factor for price decreases. Default is 10.
+    threshold (float, optional): The threshold around zero percent difference where the probability is zero. Default is 0.01.
 
     Returns:
     float: The probability of purchasing more units (for a price decrease) or fewer units (for a price increase).
