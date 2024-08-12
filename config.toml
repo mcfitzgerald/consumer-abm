@@ -49,7 +49,7 @@ price_threshold = 0.01
 
 [brands.A]
 name = "Brand A"
-current_market_share = 0.7
+current_market_share = 0.5
 base_product_price = 5.0
 [brands.A.promotions]
 promo_calendar = {spring_sale = 0.1, back_to_school = 0.25}
@@ -61,12 +61,12 @@ ad_campaigns = {TV = "quick_lag_2", Web = "back_to_school"}
 
 [brands.B]
 name = "Brand B"
-current_market_share = 0.3
-base_product_price = 4.75
+current_market_share = 0.5
+base_product_price = 5.0
 [brands.B.promotions]
-promo_calendar = {holiday_season = 0.1, summer_sale = 0.1}
+promo_calendar = {holiday_season = 0.0, summer_sale = 0.0}
 [brands.B.advertising]
-budget = 650000.0
+budget = 0.0
 channels = ["TV", "Web"]
 priority = {TV = 20, Web = 80}
 ad_campaigns = {TV = "spring_sale", Web = "holiday_season"}
