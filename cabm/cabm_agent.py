@@ -30,7 +30,6 @@ class ConsumerAgent(mesa.Agent):
 
     Agent is operated via ConsumerModel class in cabm_model.py
 
-
     Attributes
     ----------
     unique_id : int
@@ -39,49 +38,6 @@ class ConsumerAgent(mesa.Agent):
         The model instance in which the agent lives
     config : Configuration
         An instance of the Configuration class containing configuration parameters for the agent
-
-    Methods
-    -------
-    initialize_household():
-        Initializes the household size and consumption rate for the agent
-    initialize_brand_preference():
-        Initializes the brand preference and loyalty rate for the agent
-    initialize_ad_preferences():
-        Initializes the ad preferences for the agent
-    initialize_pantry():
-        Initializes the pantry for the agent
-    initialize_prices():
-        Initializes the prices for the agent
-    add_joint_calendar_properties():
-        Adds joint calendar properties to the agent
-    consume():
-        Simulates the consumption of products by the agent
-    ad_exposure():
-        Handles the ad exposure for the agent
-    compare_brand_prices():
-        Adjusts the purchase probabilities based on price impact
-    set_brand_choice():
-        Updates the brand choice based on purchase probabilities
-    reset_purchased_this_step():
-        Resets the purchased items count for the current step
-    get_step_min_and_max_units():
-        Determines the minimum and maximum possible purchases for the step
-    get_baseline_units_to_purchase():
-        Simulates the baseline purchase behavior of the agent
-    check_price():
-        Checks and updates the current price of the chosen brand
-    change_units_to_purchase_based_on_price():
-        Adjusts the units to purchase based on price changes
-    change_units_to_purchase_based_on_adstock():
-        Adjusts the units to purchase based on adstock effects
-    make_purchase():
-        Simulates the purchase behavior of the agent
-    update_brand_preference():
-        Updates the brand preference based on purchase history
-    update_purchase_history_and_preference():
-        Updates the purchase history and brand preference
-    step():
-        Defines the sequence of actions for the agent in each step of the simulation
 
     Functional Description
     ----------------------
@@ -404,31 +360,11 @@ class ConsumerAgent(mesa.Agent):
         This method reduces the agent's pantry stock based on the household size and
         the consumption rate. It ensures that the pantry stock is decremented correctly
         to reflect the consumption of products over time.
-
-        Attributes Affected:
-        - `self.pantry_stock`: Represents the current stock of products in the agent's pantry.
-          This attribute is decremented to simulate the consumption of products.
-        - `self.household_size`: Indicates the size of the household, which influences the
-          rate of consumption.
-        - `self.consumption_rate`: The rate at which the household consumes products. A higher
-          rate means faster consumption.
-
-        Why These Attributes:
-        - `self.pantry_stock` is essential for tracking the available products and ensuring
-          that the agent's behavior reflects realistic consumption patterns.
-        - `self.household_size` and `self.consumption_rate` are crucial for determining the
-          amount of product consumed, making the simulation more accurate and reflective of
-          real-world scenarios.
-
-        Error Handling:
-        - Catches `ZeroDivisionError` to handle cases where the consumption rate is zero,
-          preventing a division by zero error.
-        - Catches any other unexpected exceptions and prints an error message to aid in debugging.
         """
         try:
-            self.pantry_stock = self.pantry_stock - (
-                self.household_size / self.consumption_rate
-            )
+            self.pantry_stock -= self.household_size / self.consumption_rate
+            if self.pantry_stock < 0:
+                self.pantry_stock = 0
         except ZeroDivisionError:
             print("Error: Consumption rate cannot be zero.")
         except Exception as e:
