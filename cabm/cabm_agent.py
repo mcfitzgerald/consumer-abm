@@ -84,14 +84,6 @@ class ConsumerAgent(mesa.Agent):
         2. `consumption_rate`: Defines the rate at which the household consumes products.
            This rate is sampled from a normal distribution with a mean specified in the configuration.
            An optional override can be applied to this rate if specified in the configuration.
-
-        Attributes Affected:
-        - `self.household_size`: Affects the overall demand for products, influencing how quickly the pantry stock depletes.
-        - `self.consumption_rate`: Directly impacts the rate of consumption, which in turn affects the frequency and quantity of purchases.
-
-        Why These Attributes:
-        - The `household_size` is essential for simulating realistic consumption patterns, as larger households will naturally consume more.
-        - The `consumption_rate` provides variability in consumption behavior, allowing for more dynamic and realistic agent actions within the simulation.
         """
         self.household_size = np.random.choice(
             self.config.household_sizes, p=self.config.household_size_distribution
@@ -116,22 +108,8 @@ class ConsumerAgent(mesa.Agent):
         4. `brand_choice`: Initially set to the preferred brand but can change over time based on various factors.
         5. `purchase_history_window_length`: Determines the length of the purchase history window, sampled from a uniform distribution.
         6. `purchase_history`: A list that keeps track of the last few brands purchased by the agent, used to reset brand preference if switching is persistent.
-
-        Attributes Affected:
-        - `self.brand_preference`: Influences the initial brand choice and affects purchase probabilities.
-        - `self.loyalty_rate`: Affects the likelihood of sticking to the preferred brand versus switching to others.
-        - `self.purchase_probabilities`: Directly impacts the agent's purchasing decisions.
-        - `self.brand_choice`: Allows for dynamic changes in brand selection while maintaining a preferred brand.
-        - `self.purchase_history_window_length`: Determines how many past purchases are considered for resetting brand preference.
-        - `self.purchase_history`: Used to track recent purchases and potentially reset brand preference if switching behavior is detected.
-
-        Why These Attributes:
-        - The `brand_preference` is essential for simulating realistic brand loyalty and market share dynamics.
-        - The `loyalty_rate` provides variability in brand loyalty, allowing for more dynamic and realistic agent behavior.
-        - The `purchase_probabilities` ensure that the agent's purchasing decisions are influenced by both loyalty and market conditions.
-        - The `brand_choice` allows for flexibility in brand selection while maintaining a preferred brand.
-        - The `purchase_history_window_length` and `purchase_history` help in tracking and potentially resetting brand preference, adding depth to the agent's decision-making process.
         """
+
         self.brand_preference = np.random.choice(
             list(self.config.brand_market_share.keys()),
             p=list(self.config.brand_market_share.values()),
@@ -168,21 +146,6 @@ class ConsumerAgent(mesa.Agent):
         This method sets up various attributes related to the agent's interaction with advertisements.
         It configures whether ads are enabled, the decay factor for ad effectiveness, the agent's
         preference for different ad channels, and the adstock levels for each brand.
-
-        Attributes Affected:
-        - `self.enable_ads`: Determines if advertisements are enabled for the agent.
-        - `self.ad_decay_factor`: Controls how quickly the effectiveness of ads decays over time.
-        - `self.ad_channel_preference`: Stores the agent's preference weights for different media channels.
-        - `self.adstock`: Tracks the cumulative effect of ads for each brand.
-        - `self.adstock_incremental_sensitivity`: Sensitivity of the agent to incremental ad exposure.
-        - `self.adstock_incremental_midpoint`: Midpoint value for the agent's response to incremental ad exposure.
-
-        Why These Attributes:
-        - `self.enable_ads` is essential for toggling the influence of ads on the agent's behavior.
-        - `self.ad_decay_factor` provides a realistic decay in ad effectiveness, simulating diminishing returns.
-        - `self.ad_channel_preference` allows for differentiated impact of ads across various media channels.
-        - `self.adstock` helps in accumulating the effect of ads over time, influencing purchase decisions.
-        - `self.adstock_incremental_sensitivity` and `self.adstock_incremental_midpoint` add depth to the agent's response to varying levels of ad exposure.
         """
         self.enable_ads = self.model.enable_ads
         self.ad_decay_factor = sample_normal_min(
@@ -208,30 +171,6 @@ class ConsumerAgent(mesa.Agent):
         This method sets up various attributes related to the agent's pantry management.
         It configures the minimum and maximum pantry stock levels, initializes the pantry
         with a fully stocked state, and sets up various counters for tracking product units.
-
-        Attributes Affected:
-        - `self.pantry_min`: The minimum stock level, calculated as a percentage of household size.
-        - `self.pantry_max`: The maximum stock level, determined by the household size and pantry minimum.
-        - `self.pantry_stock`: The current stock level, initialized to the maximum stock level.
-        - `self.step_min`: The minimum number of products needed to bring stock above the pantry minimum.
-        - `self.step_max`: The maximum number of products that can be added in a single step.
-        - `self.baseline_units`: The baseline number of units in the pantry.
-        - `self.incremental_promo_units`: Units added to the pantry due to promotional activities.
-        - `self.incremental_promo_overflow`: Overflow units from promotions that exceed pantry capacity.
-        - `self.incremental_ad_units`: Units added to the pantry due to advertising influence.
-        - `self.incremental_ad_overflow`: Overflow units from ads that exceed pantry capacity.
-        - `self.decremental_units`: Units removed from the pantry.
-        - `self.purchased_this_step`: A dictionary tracking the number of units purchased for each brand in the current step.
-
-        Why These Attributes:
-        - `self.pantry_min` ensures that the agent must purchase products when stock drops below a critical level.
-        - `self.pantry_max` sets a realistic upper limit on pantry capacity, preventing overstocking.
-        - `self.pantry_stock` starts the simulation with a fully stocked pantry, providing a baseline for consumption and purchasing behavior.
-        - `self.step_min` and `self.step_max` help in managing the flow of products into the pantry.
-        - `self.baseline_units`, `self.incremental_promo_units`, and `self.incremental_ad_units` track different sources of stock additions.
-        - `self.incremental_promo_overflow` and `self.incremental_ad_overflow` handle cases where promotions or ads lead to overstocking.
-        - `self.decremental_units` tracks the removal of units, simulating consumption or spoilage.
-        - `self.purchased_this_step` provides a detailed log of purchases, aiding in analysis of buying patterns.
         """
         self.pantry_min = (
             self.household_size * self.config.pantry_min_percent
@@ -258,19 +197,6 @@ class ConsumerAgent(mesa.Agent):
         current price perception. It configures the initial price based on the agent's brand
         choice, sets up the price change status, and initializes the agent's sensitivity to
         price increases and decreases.
-
-        Attributes Affected:
-        - `self.current_price`: The current price of the chosen brand, initialized from the configuration.
-        - `self.price_change`: A status indicator for price changes, initialized to "no_price_change".
-        - `self.price_increase_sensitivity`: The agent's sensitivity to price increases, sampled from a normal distribution.
-        - `self.price_decrease_sensitivity`: The agent's sensitivity to price decreases, sampled from a normal distribution.
-        - `self.price_threshold`: The price threshold for the agent, initialized from the configuration.
-
-        Why These Attributes:
-        - `self.current_price` provides a baseline for the agent's price perception and decision-making.
-        - `self.price_change` helps in tracking whether the price has changed, influencing purchasing behavior.
-        - `self.price_increase_sensitivity` and `self.price_decrease_sensitivity` model the agent's responsiveness to price fluctuations.
-        - `self.price_threshold` sets a limit for price changes that the agent is willing to tolerate, affecting purchase decisions.
         """
         self.current_price = self.config.brand_base_price[self.brand_choice]
         self.price_change = "no_price_change"
@@ -296,18 +222,6 @@ class ConsumerAgent(mesa.Agent):
         - brand (str): The brand for which the attribute is being accessed.
         - attribute (str): The specific attribute of the brand to be accessed.
 
-        Attributes Affected:
-        - `self.model.config.joint_calendar`: The joint calendar DataFrame from which
-          the attribute values are retrieved.
-        - `self.model.week_number`: The current week number, used to index the joint calendar.
-
-        Why These Attributes:
-        - `self.model.config.joint_calendar` provides the structured data for various
-          attributes of different brands over time, essential for simulating real-world
-          scenarios.
-        - `self.model.week_number` ensures that the data retrieved corresponds to the
-          current simulation week, maintaining temporal accuracy in the agent's behavior.
-
         Example:
         If `property_name` is "promo_A", `brand` is "A", and `attribute` is "promo",
         this method will create a property `promo_A` that returns the promotion value
@@ -330,19 +244,6 @@ class ConsumerAgent(mesa.Agent):
         pair, it constructs a property name and uses the `_create_joint_calendar_property`
         method to dynamically create a property on the agent class. This allows the agent
         to access these attributes easily through named properties.
-
-        Attributes Affected:
-        - `self.model.config.joint_calendar`: The joint calendar DataFrame that holds
-          the attributes for different brands over time.
-        - `self.model.week_number`: The current week number, which is used to index
-          the joint calendar and retrieve the relevant attribute values.
-
-        Why These Attributes:
-        - `self.model.config.joint_calendar` provides the structured data necessary
-          for simulating real-world scenarios, including promotions, pricing, and other
-          brand-specific attributes.
-        - `self.model.week_number` ensures that the data retrieved is relevant to the
-          current simulation week, maintaining temporal accuracy in the agent's behavior.
 
         Example:
         If the joint calendar has a column ('A', 'promo'), this method will create a
@@ -381,22 +282,6 @@ class ConsumerAgent(mesa.Agent):
         2. Calculate the adstock for the current week based on the joint calendar, brand channel map, and ad channel preference.
         3. Update the adstock with the newly calculated weekly adstock.
         4. Generate purchase probabilities influenced by the updated adstock.
-
-        Attributes Affected:
-        - `self.adstock`: Represents the cumulative effect of advertising over time. It is decayed and updated to reflect the current week's ad exposure.
-        - `self.purchase_probabilities`: Stores the probabilities of purchasing different brands. It is updated based on the impact of the adstock.
-        - `self.brand_preference`: Indicates the agent's preference for different brands, which influences the purchase probabilities.
-        - `self.loyalty_rate`: Represents the agent's loyalty to brands, affecting how adstock influences purchase probabilities.
-
-        Why These Attributes:
-        - `self.adstock` is crucial for modeling the effect of advertising over time, ensuring that past ad exposures influence current behavior.
-        - `self.purchase_probabilities` are essential for determining the likelihood of purchasing different brands, making the simulation realistic.
-        - `self.brand_preference` and `self.loyalty_rate` are important for personalizing the agent's behavior, reflecting individual differences in brand loyalty and preferences.
-
-        Error Handling:
-        - Catches `ZeroDivisionError` to handle cases where a division by zero might occur.
-        - Catches `KeyError` to handle missing keys in dictionaries.
-        - Catches any other unexpected exceptions and prints an error message to aid in debugging.
         """
         try:
             # 1) Decay current self.adstock
@@ -435,17 +320,6 @@ class ConsumerAgent(mesa.Agent):
         1. Calculates the price impact probabilities for each brand.
         2. Adjusts the current purchase probabilities by averaging them with the price impact probabilities.
         3. Normalizes the adjusted purchase probabilities so they sum to 1.
-
-        Attributes Affected:
-        - `self.purchase_probabilities`: This attribute is updated to reflect the combined influence of advertising and price impact on the likelihood of purchasing different brands.
-
-        Why These Attributes:
-        - `self.purchase_probabilities` is crucial for determining the likelihood of purchasing different brands. By incorporating price impact, the model becomes more realistic and reflective of consumer behavior.
-
-        Error Handling:
-        - Catches `ZeroDivisionError` to handle cases where a division by zero might occur during the adjustment process.
-        - Catches `KeyError` to handle missing keys in dictionaries, ensuring robustness.
-        - Catches any other unexpected exceptions and prints an error message to aid in debugging.
         """
         try:
             price_impact_probabilities = get_price_impact_on_brand_choice_probabilities(
@@ -494,19 +368,6 @@ class ConsumerAgent(mesa.Agent):
         1. Extracts the list of brands and their corresponding purchase probabilities.
         2. Uses a weighted random choice to select a brand based on these probabilities.
         3. Updates the `self.brand_choice` attribute with the selected brand.
-
-        Attributes Affected:
-        - `self.brand_choice`: This attribute is updated to reflect the brand
-          chosen by the agent for the current step.
-
-        Why These Attributes:
-        - `self.brand_choice` is crucial for subsequent methods that depend on
-          knowing which brand the agent has decided to purchase. It directly
-          influences the simulation of consumer behavior and purchasing patterns.
-
-        Logging:
-        - Logs the current purchase probabilities for debugging and analysis.
-        - Logs the chosen brand to track the agent's decision-making process.
         """
         brands = list(self.purchase_probabilities.keys())
         probabilities = list(self.purchase_probabilities.values())
@@ -523,27 +384,6 @@ class ConsumerAgent(mesa.Agent):
         which keeps track of the number of units purchased for each brand during
         the current step of the simulation. It sets the purchase count to zero for
         all brands listed in the agent's configuration.
-
-        Attributes Affected:
-        - `self.purchased_this_step`: A dictionary where the keys are brand names
-          and the values are the number of units purchased for each brand in the
-          current step. This attribute is reset to zero for all brands at the start
-          of each simulation step.
-
-        Why These Attributes:
-        - `self.purchased_this_step` is crucial for accurately tracking the agent's
-          purchasing behavior within each simulation step. It ensures that the purchase
-          counts are correctly reset, preventing carry-over from previous steps, which
-          could otherwise lead to incorrect simulation results and analysis.
-
-        Example:
-        If the agent's configuration includes brands 'A', 'B', and 'C', then after
-        calling this method, `self.purchased_this_step` will be:
-        {
-            'A': 0,
-            'B': 0,
-            'C': 0
-        }
         """
         self.purchased_this_step = {
             brand: 0 for brand in self.config.brand_list
@@ -557,16 +397,6 @@ class ConsumerAgent(mesa.Agent):
         This method calculates the minimum (`self.step_min`) and maximum (`self.step_max`)
         possible purchases for the current step by considering the agent's pantry stock
         and the defined pantry limits (`self.pantry_min` and `self.pantry_max`).
-
-        Attributes Affected:
-        - `self.step_min`: The minimum number of units the agent can purchase in the current step.
-        - `self.step_max`: The maximum number of units the agent can purchase in the current step.
-
-        Why These Attributes:
-        - `self.step_min` and `self.step_max` are crucial for ensuring that the agent's purchases
-          stay within the defined pantry constraints. These attributes are used in subsequent
-          methods to determine the actual number of units to purchase, ensuring realistic
-          simulation of consumer behavior.
 
         Calculation Details:
         - `self.step_min` is calculated as the maximum of 0 and the ceiling value of the difference
@@ -599,13 +429,6 @@ class ConsumerAgent(mesa.Agent):
         maximum units (`self.step_min` and `self.step_max`) that the agent can purchase, which are
         derived from the pantry constraints (`self.pantry_min` and `self.pantry_max`).
 
-        Attributes Affected:
-        - `self.baseline_units`: The baseline number of units the agent will purchase in the current step.
-
-        Why This Attribute:
-        - `self.baseline_units` is crucial for determining the initial number of units the agent plans to purchase
-          before any adjustments based on price changes or promotions. It serves as the foundation for the agent's
-          purchasing decision in the simulation.
 
         Calculation Details:
         - If `self.step_min` is equal to `self.step_max`, the baseline units are set to that value.
@@ -762,25 +585,10 @@ class ConsumerAgent(mesa.Agent):
         """
         Calculate and finalize the number of units to purchase for the current step.
 
-        This method determines the total units to purchase by summing up the baseline units,
+        This method calculates the total units to purchase by summing up the baseline units,
         promotional incremental units, adstock incremental units, and subtracting the decremental units.
-        If the total units exceed the maximum allowable units (`step_max`), it adjusts the overflow
-        by probabilistically reducing either the promotional or adstock incremental units.
-
-        Attributes Affected:
-        - self.baseline_units: The base number of units to purchase without any adjustments.
-        - self.incremental_promo_units: Additional units to purchase due to promotional effects.
-        - self.incremental_ad_units: Additional units to purchase due to adstock effects.
-        - self.decremental_units: Units to subtract due to price increase effects.
-        - self.step_max: The maximum number of units that can be purchased in a single step.
-        - self.incremental_promo_overflow: The overflow units subtracted from promotional units if the total exceeds `step_max`.
-        - self.incremental_ad_overflow: The overflow units subtracted from adstock units if the total exceeds `step_max`.
-        - self.purchased_this_step: Dictionary tracking the number of units purchased for each brand in the current step.
-        - self.pantry_stock: The total number of units added to the pantry stock after purchase.
-
-        Why:
-        - Ensures that the total units purchased do not exceed the maximum allowable units (`step_max`).
-        - Adjusts the overflow units probabilistically between promotional and adstock units to maintain realistic purchasing behavior.
+        If the total units exceed the maximum allowable units (`step_max`), it caps the total units at `step_max`.
+        Additionally, if the total units are less than zero, it sets the total units to zero.
         """
         try:
             units_to_purchase = (
@@ -790,14 +598,10 @@ class ConsumerAgent(mesa.Agent):
                 - self.decremental_units
             )
             if units_to_purchase > self.step_max:
-                overflow = units_to_purchase - self.step_max
-                if np.random.choice([True, False]):
-                    self.incremental_promo_units -= overflow
-                    self.incremental_promo_overflow = overflow
-                else:
-                    self.incremental_ad_units -= overflow
-                    self.incremental_ad_overflow = overflow
                 units_to_purchase = self.step_max
+            
+            if units_to_purchase < 0:
+                units_to_purchase = 0
         except Exception as e:
             print("An unexpected error occurred in make_purchase:", e)
 
