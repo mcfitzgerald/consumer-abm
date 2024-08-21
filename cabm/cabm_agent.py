@@ -187,6 +187,7 @@ class ConsumerAgent(mesa.Agent):
         self.incremental_ad_units = 0
         self.incremental_ad_overflow = 0
         self.decremental_units = 0
+        self.units_to_purchase = 0
         self.purchased_this_step = {brand: 0 for brand in self.config.brand_list}
 
     def initialize_prices(self):
@@ -591,22 +592,22 @@ class ConsumerAgent(mesa.Agent):
         Additionally, if the total units are less than zero, it sets the total units to zero.
         """
         try:
-            units_to_purchase = (
+            self.units_to_purchase = (
                 self.baseline_units
                 + self.incremental_promo_units
                 + self.incremental_ad_units
                 - self.decremental_units
             )
-            if units_to_purchase > self.step_max:
-                units_to_purchase = self.step_max
-            
-            if units_to_purchase < 0:
-                units_to_purchase = 0
+            if self.units_to_purchase > self.step_max:
+                self.units_to_purchase = self.step_max
+
+            if self.units_to_purchase < 0:
+                self.units_to_purchase = 0
         except Exception as e:
             print("An unexpected error occurred in make_purchase:", e)
 
-        self.purchased_this_step[self.brand_choice] = units_to_purchase
-        self.pantry_stock += units_to_purchase
+        self.purchased_this_step[self.brand_choice] = self.units_to_purchase
+        self.pantry_stock += self.units_to_purchase
 
     def update_brand_preference(self):
         """

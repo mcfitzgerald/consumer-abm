@@ -107,6 +107,7 @@ class ConsumerModel(mesa.Model):
             "Last_Product_Price": "last_product_price",
             "Step_Min": "step_min",
             "Step_Max": "step_max",
+            "Units_to_Purchase": "units_to_purchase",
             "Baseline_Units": "baseline_units",
             "Incremental_Promo_Units": "incremental_promo_units",
             "Incremental_Ad_Units": "incremental_ad_units",
