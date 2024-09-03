@@ -317,6 +317,7 @@ def get_probability_of_change_in_units_purchased_due_to_adstock(
     adstock: float,
     sensitivity: float = 1,
     midpoint: float = 1000,
+    limit: float = 500,
 ) -> float:
     """
     This function calculates the probability of an additional purchase based on the adstock value.
@@ -325,10 +326,15 @@ def get_probability_of_change_in_units_purchased_due_to_adstock(
     adstock (float): The adstock value.
     sensitivity (float): The sensitivity factor for adstock. Default is 1.
     midpoint (float): The midpoint of the logistic curve. Default is 1000.
+    limit (float): The adstock limit above which the probability is 0. Default is 10000.
 
     Returns:
     float: The probability of an additional purchase.
     """
+    # If adstock is greater than or equal to the limit, return 0
+    if adstock >= limit:
+        return 0.0
+
     # Use the logistic function to model the probability
     probability = 1 / (
         1 + np.exp(-sensitivity * (np.log10(adstock) - np.log10(midpoint)))

@@ -1,11 +1,2 @@
-create similar probability function for incremental/decremental purchase based on adstock
-
-create flexible logic for incrementing based on price and adstock   
-
-create baseline_units attribute and then price_incremental and ad_incremental attributes and then some logic to add them together for total purchase and add to reporters!
-
-check and validate method flow on step
-
-THE BRAND PREFERENCE HISTORY IS BROKEN AND CAUSES STRANGE BEHAVIOR -- UPDATE - it's not, i left a variable out of the  model declaration (enable_ads = False)
-
-add readme for running the model somewhere in the code docs
+the adstock limit for incremental purchases is hard coded and should be made dynamic and defined in config
+something is wrong with the incremental purchase functions - incremental ad units are showing up even when there are no ads being run

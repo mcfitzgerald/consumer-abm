@@ -163,6 +163,7 @@ class ConsumerAgent(mesa.Agent):
             self.config.adstock_incremental_midpoint,
             std_dev=(self.config.adstock_incremental_midpoint / 10.0),
         )
+        self.adstock_incremental_limit = 500
 
     def initialize_pantry(self):
         """
@@ -567,6 +568,7 @@ class ConsumerAgent(mesa.Agent):
             self.adstock[self.brand_choice],
             self.adstock_incremental_sensitivity,
             self.adstock_incremental_midpoint,
+            self.adstock_incremental_limit,
         )
 
         event_branch = np.random.choice(
