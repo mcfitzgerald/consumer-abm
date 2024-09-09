@@ -431,7 +431,6 @@ class ConsumerAgent(mesa.Agent):
         maximum units (`self.step_min` and `self.step_max`) that the agent can purchase, which are
         derived from the pantry constraints (`self.pantry_min` and `self.pantry_max`).
 
-
         Calculation Details:
         - If `self.step_min` is equal to `self.step_max`, the baseline units are set to that value.
         - If `self.step_min` is not equal to `self.step_max`, a triangular distribution is used to randomly
@@ -445,7 +444,22 @@ class ConsumerAgent(mesa.Agent):
         triangular distribution to select a value between 5 and 15, with 10 being the most likely value.
         """
         try:
+            # Reset baseline_units at the beginning of the method
+            self.baseline_units = 0
+
             if self.step_max > 0:
+                # Define a small tolerance value for floating-point comparisons
+                epsilon = 1e-9
+
+                # Initialize mode to None
+                mode = None
+
+                # Check that step_min is less than or equal to step_max
+                if self.step_min > self.step_max:
+                    raise ValueError(
+                        f"step_min ({self.step_min}) cannot be greater than step_max ({self.step_max})"
+                    )
+
                 if self.step_min == self.step_max:
                     # If min and max are the same, set units to purchase to that value
                     self.baseline_units = self.step_min
@@ -455,8 +469,16 @@ class ConsumerAgent(mesa.Agent):
                     self.baseline_units = int(
                         np.random.triangular(self.step_min, mode, self.step_max)
                     )
+                # Ensure baseline_units does not exceed step_max, considering floating-point precision
+                if self.baseline_units > self.step_max + epsilon:
+                    self.baseline_units = self.step_max
+
+                # Debugging: Print the calculated values
+                print(
+                    f"Agent ID: {self.unique_id}, Step: {self.model.week_number}, Baseline Units: {self.baseline_units}, Step Min: {self.step_min}, Step Max: {self.step_max}, Mode: {mode}"
+                )
         except Exception as e:
-            print("An unexpected error occurred in purchase:", e)
+            print("An unexpected error occurred in get_baseline_units_to_purchase:", e)
 
     def check_price(self):
         """
@@ -594,20 +616,42 @@ class ConsumerAgent(mesa.Agent):
         Additionally, if the total units are less than zero, it sets the total units to zero.
         """
         try:
+            # Define a small tolerance value for floating-point comparisons
+            epsilon = 1e-9
+
+            # Debugging: Print the intermediate values
+            print(
+                f"Agent ID: {self.unique_id}, Step: {self.model.week_number}, Baseline Units: {self.baseline_units}, Incremental Promo Units: {self.incremental_promo_units}, Incremental Ad Units: {self.incremental_ad_units}, Decremental Units: {self.decremental_units}"
+            )
+
+            # Calculate the proposed units to purchase
             self.units_to_purchase = (
                 self.baseline_units
                 + self.incremental_promo_units
                 + self.incremental_ad_units
                 - self.decremental_units
             )
-            if self.units_to_purchase > self.step_max:
+            # Debugging: Print the proposed units to purchase
+            print(
+                f"Agent ID: {self.unique_id}, Step: {self.model.week_number}, Proposed Units to Purchase: {self.units_to_purchase}, Step Max: {self.step_max}"
+            )
+
+            # Ensure units_to_purchase does not exceed step_max, considering floating-point precision
+            if self.units_to_purchase > self.step_max + epsilon:
                 self.units_to_purchase = self.step_max
 
-            if self.units_to_purchase < 0:
+            # Ensure units_to_purchase is not less than zero
+            if self.units_to_purchase < 0 - epsilon:
                 self.units_to_purchase = 0
+
+            # Debugging: Print the final units to purchase
+            print(
+                f"Agent ID: {self.unique_id}, Step: {self.model.week_number}, Final Units to Purchase: {self.units_to_purchase}"
+            )
         except Exception as e:
             print("An unexpected error occurred in make_purchase:", e)
 
+        # Update the purchased units for the current step
         self.purchased_this_step[self.brand_choice] = self.units_to_purchase
         self.pantry_stock += self.units_to_purchase
 
