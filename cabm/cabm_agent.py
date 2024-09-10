@@ -39,22 +39,22 @@ class ConsumerAgent(mesa.Agent):
     config : Configuration
         An instance of the Configuration class containing configuration parameters for the agent
 
-    Functional Description
+        Functional Description
     ----------------------
-    The `step` method orchestrates the agent's behavior in each simulation step. The agent performs the following actions in sequence:
+    The `step` method orchestrates the agent's behavior in each simulation step, performing the following actions:
 
-    1. **Consumption (`consume` method)**: Simulates the consumption of products by reducing the pantry stock based on household size and consumption rate.
-    2. **Ad Exposure (`ad_exposure` method)**: If ads are enabled, handles ad exposure by decaying current adstock, calculating weekly adstock, updating adstock, and generating purchase probabilities based on ad effects.
-    3. **Price Comparison (`compare_brand_prices` method)**: If price comparison is enabled, adjusts purchase probabilities based on price impact and normalizes them.
-    4. **Set Brand Choice (`set_brand_choice` method)**: Updates the brand choice based on the current purchase probabilities.
-    5. **Reset Purchased Items (`reset_purchased_this_step` method)**: Resets the count of purchased items for the current step.
-    6. **Determine Min and Max Units (`get_step_min_and_max_units` method)**: Determines the minimum and maximum possible purchases for the step based on pantry stock.
-    7. **Baseline Units to Purchase (`get_baseline_units_to_purchase` method)**: Simulates the baseline purchase behavior using a triangular distribution.
-    8. **Check Price (`check_price` method)**: If price elasticity is enabled, checks and updates the current price of the chosen brand.
-    9. **Adjust Units Based on Price (`change_units_to_purchase_based_on_price` method)**: Adjusts the units to purchase based on price changes.
-    10. **Adjust Units Based on Adstock (`change_units_to_purchase_based_on_adstock` method)**: If ad increment is enabled, adjusts the units to purchase based on adstock effects.
-    11. **Make Purchase (`make_purchase` method)**: Simulates the purchase behavior by calculating the total units to purchase and updating the pantry stock.
-    12. **Update Purchase History and Preference (`update_purchase_history_and_preference` method)**: Updates the purchase history and brand preference based on recent purchases.
+    0. **Reset Step Values (`reset_step_values` method)**: Resets the values that need to be reinitialized at the beginning of each step.
+    1. **Consume (`consume` method)**: Reduces pantry stock based on household size and consumption rate.
+    2. **Ad Exposure (`ad_exposure` method)**: If enabled, updates adstock and purchase probabilities based on ads.
+    3. **Price Comparison (`compare_brand_prices` method)**: If enabled, adjusts purchase probabilities based on price impact.
+    4. **Set Brand Choice (`set_brand_choice` method)**: Updates brand choice based on purchase probabilities.
+    5. **Determine Min and Max Units (`get_step_min_and_max_units` method)**: Calculates min and max possible purchases based on pantry stock.
+    6. **Baseline Units to Purchase (`get_baseline_units_to_purchase` method)**: Determines baseline purchase units using a triangular distribution.
+    7. **Check Price (`check_price` method)**: If price elasticity is enabled, updates current price and price change status.
+    8. **Adjust Units Based on Price (`change_units_to_purchase_based_on_price` method)**: Adjusts units to purchase based on price changes.
+    9. **Adjust Units Based on Adstock (`change_units_to_purchase_based_on_adstock` method)**: If enabled, adjusts units to purchase based on adstock effects.
+    10. **Make Purchase (`make_purchase` method)**: Finalizes purchase units and updates pantry stock.
+    11. **Update Purchase History and Preference (`update_purchase_history_and_preference` method)**: Updates purchase history and brand preference.
     """
 
     def __init__(
@@ -256,6 +256,23 @@ class ConsumerAgent(mesa.Agent):
             property_name = f"{attribute.lower()}_{brand.upper()}"
             self._create_joint_calendar_property(property_name, brand, attribute)
 
+    def reset_step_values(self):
+        """
+        Resets the values that need to be reinitialized at the beginning of each step.
+        """
+        self.baseline_units = 0
+        self.incremental_promo_units = 0
+        self.incremental_ad_units = 0
+        self.decremental_units = 0
+        self.units_to_purchase = 0
+        self.purchased_this_step = {brand: 0 for brand in self.config.brand_list}
+        # Add any other attributes that need to be reset here
+
+        # Debugging: Log a message indicating that values have been reset
+        logging.debug(
+            f"Agent ID: {self.unique_id}, Step: {self.model.week_number}, Step values have been reset."
+        )
+
     def consume(self):
         """
         Simulates the consumption of products by the agent.
@@ -301,8 +318,6 @@ class ConsumerAgent(mesa.Agent):
             self.adstock = update_adstock(self.adstock, weekly_adstock)
 
             # 4) Generate purchase probabilities
-            logging.debug("*** NEXT AGENT OR STEP ***")
-            logging.debug(f"Agent ID: {self.unique_id}, Step: {self.model.week_number}")
             self.purchase_probabilities = get_ad_impact_on_purchase_probabilities(
                 self.adstock, self.brand_preference, self.loyalty_rate
             )
@@ -375,22 +390,6 @@ class ConsumerAgent(mesa.Agent):
         probabilities = list(self.purchase_probabilities.values())
         self.brand_choice = np.random.choice(brands, p=probabilities)
 
-        logging.debug(f"Purchase probabilities: {self.purchase_probabilities}")
-        logging.debug(f"Brand choice: {self.brand_choice}")
-
-    def reset_purchased_this_step(self):
-        """
-        Resets the purchase count for each brand for the current simulation step.
-
-        This method initializes or resets the `self.purchased_this_step` attribute,
-        which keeps track of the number of units purchased for each brand during
-        the current step of the simulation. It sets the purchase count to zero for
-        all brands listed in the agent's configuration.
-        """
-        self.purchased_this_step = {
-            brand: 0 for brand in self.config.brand_list
-        }  # Reset purchase count
-
     def get_step_min_and_max_units(self):
         """
         Determines the minimum and maximum number of units the agent can purchase
@@ -444,12 +443,12 @@ class ConsumerAgent(mesa.Agent):
         triangular distribution to select a value between 5 and 15, with 10 being the most likely value.
         """
         try:
-            # Reset baseline_units at the beginning of the method
-            self.baseline_units = 0
+            # # Reset baseline_units at the beginning of the method
+            # self.baseline_units = 0
 
             if self.step_max > 0:
                 # Define a small tolerance value for floating-point comparisons
-                epsilon = 1e-9
+                # epsilon = 1e-9
 
                 # Initialize mode to None
                 mode = None
@@ -470,11 +469,11 @@ class ConsumerAgent(mesa.Agent):
                         np.random.triangular(self.step_min, mode, self.step_max)
                     )
                 # Ensure baseline_units does not exceed step_max, considering floating-point precision
-                if self.baseline_units > self.step_max + epsilon:
+                if self.baseline_units > self.step_max:
                     self.baseline_units = self.step_max
 
                 # Debugging: Print the calculated values
-                print(
+                logging.debug(
                     f"Agent ID: {self.unique_id}, Step: {self.model.week_number}, Baseline Units: {self.baseline_units}, Step Min: {self.step_min}, Step Max: {self.step_max}, Mode: {mode}"
                 )
         except Exception as e:
@@ -516,24 +515,6 @@ class ConsumerAgent(mesa.Agent):
         This method uses the probability of an incrementing or decrementing event to modify the baseline units
         based on the current price. The probability is determined by the price sensitivity parameters and the
         threshold value.
-
-        Attributes Affected:
-        - self.incremental_promo_units: The number of additional units to purchase if the price has decreased.
-          This is determined by a random integer between 1 and the maximum possible additional units, which is
-          the difference between step_max and baseline_units. If no additional units can be added, it is set to 0.
-        - self.decremental_units: The number of units to reduce if the price has increased. This is determined by
-          a random integer between 1 and the maximum possible decremental units, which is the difference between
-          baseline_units and step_min. If no units can be reduced, it is set to 0.
-
-        Why These Attributes:
-        - `self.incremental_promo_units` reflects consumer behavior in response to price decreases, potentially
-          increasing the number of units purchased.
-        - `self.decremental_units` reflects consumer behavior in response to price increases, potentially decreasing
-          the number of units purchased.
-
-        The method first calculates the probability of a change in units purchased due to the price change. It then
-        randomly decides whether an event (increment or decrement) will occur based on this probability. If an event
-        occurs, it adjusts the units accordingly.
         """
         event_probability = get_probability_of_change_in_units_purchased_due_to_price(
             self.config.brand_base_price[self.brand_choice],
@@ -574,17 +555,6 @@ class ConsumerAgent(mesa.Agent):
         This method calculates the probability of an incrementing event occurring due to adstock,
         which is a measure of the lingering effect of advertising on consumer behavior. If the event
         occurs, it increases the number of units to purchase.
-
-        Attributes Affected:
-        - self.incremental_ad_units: The number of additional units to purchase due to adstock effects.
-          This is determined by a random integer between 1 and the maximum possible additional units,
-          which is the difference between step_max and baseline_units. If no additional units can be
-          added, it is set to 0.
-
-        Why:
-        - Adstock effects influence consumer behavior, potentially increasing the number of units
-          purchased. This method models that behavior by probabilistically determining if an incrementing
-          event occurs and adjusting the purchase units accordingly.
         """
         event_probability = get_probability_of_change_in_units_purchased_due_to_adstock(
             self.adstock[self.brand_choice],
@@ -617,10 +587,10 @@ class ConsumerAgent(mesa.Agent):
         """
         try:
             # Define a small tolerance value for floating-point comparisons
-            epsilon = 1e-9
+            # epsilon = 1e-9
 
             # Debugging: Print the intermediate values
-            print(
+            logging.debug(
                 f"Agent ID: {self.unique_id}, Step: {self.model.week_number}, Baseline Units: {self.baseline_units}, Incremental Promo Units: {self.incremental_promo_units}, Incremental Ad Units: {self.incremental_ad_units}, Decremental Units: {self.decremental_units}"
             )
 
@@ -632,20 +602,20 @@ class ConsumerAgent(mesa.Agent):
                 - self.decremental_units
             )
             # Debugging: Print the proposed units to purchase
-            print(
+            logging.debug(
                 f"Agent ID: {self.unique_id}, Step: {self.model.week_number}, Proposed Units to Purchase: {self.units_to_purchase}, Step Max: {self.step_max}"
             )
 
             # Ensure units_to_purchase does not exceed step_max, considering floating-point precision
-            if self.units_to_purchase > self.step_max + epsilon:
+            if self.units_to_purchase > self.step_max:
                 self.units_to_purchase = self.step_max
 
             # Ensure units_to_purchase is not less than zero
-            if self.units_to_purchase < 0 - epsilon:
+            if self.units_to_purchase < 0:
                 self.units_to_purchase = 0
 
             # Debugging: Print the final units to purchase
-            print(
+            logging.debug(
                 f"Agent ID: {self.unique_id}, Step: {self.model.week_number}, Final Units to Purchase: {self.units_to_purchase}"
             )
         except Exception as e:
@@ -663,15 +633,6 @@ class ConsumerAgent(mesa.Agent):
         as specified by `purchase_history_window_length`. If the purchase history does not
         meet this requirement, an exception is raised. If all elements in the purchase history
         are the same, it updates the `brand_preference` to the consistent brand in the history.
-
-        Attributes Affected:
-        - self.purchase_history: A list tracking the brands purchased over a defined window of time.
-        - self.purchase_history_window_length: The required number of elements in the purchase history.
-        - self.brand_preference: The preferred brand based on the purchase history.
-
-        Why:
-        - Ensures that the purchase history is complete and valid before updating the brand preference.
-        - Updates the brand preference only if there is a consistent purchase pattern, reflecting a true preference.
         """
         if len(self.purchase_history) != self.purchase_history_window_length:
             raise Exception(
@@ -687,18 +648,6 @@ class ConsumerAgent(mesa.Agent):
         This method performs two main tasks:
         1. Updates the purchase history by removing the oldest entry and appending the current brand choice.
         2. Calls the `update_brand_preference` method to potentially update the brand preference based on the updated purchase history.
-
-        Attributes Affected:
-        - self.purchase_history: A list that tracks the brands purchased over a defined window of time.
-          - Why: Ensures that the purchase history reflects the most recent purchases, maintaining a fixed window length.
-        - self.brand_choice: The brand chosen in the current step.
-          - Why: The current brand choice is appended to the purchase history to keep it up-to-date.
-        - self.brand_preference: The preferred brand based on the purchase history.
-          - Why: The brand preference is updated to reflect any consistent purchase patterns, indicating a true preference.
-
-        Why:
-        - Maintaining an accurate and up-to-date purchase history is crucial for analyzing purchasing behavior.
-        - Updating the brand preference based on the latest purchase history ensures that the agent's preferences are aligned with its recent behavior.
         """
         self.purchase_history.pop(0)  # Remove the oldest purchase history entry
         self.purchase_history.append(
@@ -712,36 +661,15 @@ class ConsumerAgent(mesa.Agent):
 
         This method orchestrates the agent's behavior in a single simulation step by calling a series of methods
         that simulate consumption, exposure to advertisements, price comparison, brand choice, and purchase decisions.
-
-        Attributes Affected:
-        - self.model.enable_ads: Determines if the agent should be exposed to advertisements.
-          - Why: Advertisement exposure can influence the agent's brand choice.
-        - self.model.compare_brand_prices: Determines if the agent should compare brand prices.
-          - Why: Price comparison can affect the agent's decision on which brand to purchase.
-        - self.model.enable_elasticity: Determines if the agent should adjust purchase quantities based on price elasticity.
-          - Why: Price elasticity affects how sensitive the agent's purchase quantity is to price changes.
-        - self.model.enable_ad_increment: Determines if the agent should adjust purchase quantities based on adstock.
-          - Why: Adstock effects can influence the agent's purchase quantity over time.
-        - self.brand_choice: The brand chosen by the agent in the current step.
-          - Why: The brand choice is updated based on various factors like ads, prices, and preferences.
-        - self.purchase_history: A list tracking the brands purchased over a defined window of time.
-          - Why: The purchase history is updated to reflect the most recent purchases, maintaining a fixed window length.
-        - self.brand_preference: The preferred brand based on the purchase history.
-          - Why: The brand preference is updated to reflect any consistent purchase patterns, indicating a true preference.
-        - self.units_to_purchase: The number of units the agent decides to purchase.
-          - Why: The number of units is adjusted based on factors like price and adstock to reflect realistic purchasing behavior.
-
-        Why:
-        - This method ensures that all relevant factors influencing the agent's behavior are considered in each simulation step.
-        - It maintains an accurate and up-to-date state of the agent's attributes, which is crucial for realistic simulation outcomes.
         """
+        self.reset_step_values()  # Reset the step values at the beginning of each step.
         self.consume()  # Simulate the agent consuming products.
         if self.model.enable_ads:
             self.ad_exposure()  # Expose the agent to advertisements if enabled.
         if self.model.compare_brand_prices:
             self.compare_brand_prices()  # Compare brand prices if enabled.
         self.set_brand_choice()  # Set the agent's brand choice based on various factors.
-        self.reset_purchased_this_step()  # Reset the flag indicating if a purchase was made this step.
+        # self.reset_purchased_this_step()  # Reset the flag indicating if a purchase was made this step.
         self.get_step_min_and_max_units()  # Determine the minimum and maximum units the agent can purchase this step.
         self.get_baseline_units_to_purchase()  # Get the baseline number of units to purchase.
         if self.model.enable_elasticity:

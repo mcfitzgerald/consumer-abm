@@ -11,9 +11,9 @@ from .model_functions import (
     compute_average_purchase_probability,
 )
 
-# Set up logger
+# # Set up logger
 # logger = logging.getLogger()
-# logger.setLevel(logging.INFO)
+# logger.setLevel(logging.DEBUG)
 
 # # Create a log file with current date and time
 # logfile = datetime.datetime.now().strftime("log_%m%d%y%H%M%p.log")

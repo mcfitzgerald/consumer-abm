@@ -331,8 +331,8 @@ def get_probability_of_change_in_units_purchased_due_to_adstock(
     Returns:
     float: The probability of an additional purchase.
     """
-    # If adstock is greater than or equal to the limit, return 0
-    if adstock >= limit:
+    # If adstock is less than or equal to the limit, return 0
+    if adstock <= limit:
         return 0.0
 
     # Use the logistic function to model the probability

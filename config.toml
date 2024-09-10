@@ -39,7 +39,7 @@ price_threshold = 0.01
 
 [brands]
 # Base product price - the sticker price of a product
-# Promo calendar - the period (campaign) and percentage of the base price that a promo reduces the price by
+# Promo calendar - WARNING - this is a misnomer, it actually just a price multiplier (increasse or discount) for the stated period (campaign)
 # Current market share - the percentage of the market that a brand currently has
 # Advertising budget - the amount of money spent on advertising
 # Advertising channels - the channels that a brand advertises on
@@ -52,7 +52,7 @@ name = "Brand A"
 current_market_share = 0.50
 base_product_price = 5.0
 [brands.A.promotions]
-promo_calendar = {spring_sale = 0.1, back_to_school = 0.25}
+promo_calendar = {spring_sale = 0.90, back_to_school = 1.1} # 0.9 is a 10% discount, 1.1 is a 10% increase
 [brands.A.advertising]
 budget = 1000000.0
 channels = ["TV", "Web"]
