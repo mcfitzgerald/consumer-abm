@@ -54,6 +54,7 @@ get_ad_impact_on_purchase_probabilities	agent_functions.py	/^def get_ad_impact_o
 get_current_price	agent_functions.py	/^def get_current_price(week: int, joint_calendar: pd.DataFrame, brand: str) -> float:$/;"	f
 get_pantry_max	agent_functions.py	/^def get_pantry_max(household_size: int, pantry_min: int) -> int:$/;"	f
 get_price_impact_on_purchase_probabilities	agent_functions.py	/^def get_price_impact_on_purchase_probabilities($/;"	f
+get_units_to_purchase	cabm_agent.py	/^    def get_units_to_purchase(self):$/;"	m	class:ConsumerAgent
 getter	cabm_agent.py	/^        def getter(self):$/;"	f	function:ConsumerAgent._create_joint_calendar_property
 initialize_ad_preferences	cabm_agent.py	/^    def initialize_ad_preferences(self):$/;"	m	class:ConsumerAgent
 initialize_brand_preference	cabm_agent.py	/^    def initialize_brand_preference(self):$/;"	m	class:ConsumerAgent
@@ -80,15 +81,15 @@ pd	promo_calendar.py	/^import pandas as pd$/;"	i
 prepare_ad_schedule_variables	ad_calendar.py	/^def prepare_ad_schedule_variables($/;"	f
 prepare_promo_schedule_variables	promo_calendar.py	/^def prepare_promo_schedule_variables($/;"	f
 price_exposure	cabm_agent.py	/^    def price_exposure(self):$/;"	m	class:ConsumerAgent
-purchase	cabm_agent.py	/^    def purchase(self):$/;"	m	class:ConsumerAgent
 random	agent_functions.py	/^import random$/;"	i
 sample_beta_min	agent_functions.py	/^def sample_beta_min($/;"	f
 sample_normal_min	agent_functions.py	/^def sample_normal_min($/;"	f
 set_brand_choice	cabm_agent.py	/^    def set_brand_choice(self):$/;"	m	class:ConsumerAgent
-set_purchase_behavior	cabm_agent.py	/^    def set_purchase_behavior(self):$/;"	m	class:ConsumerAgent
 step	cabm_agent.py	/^    def step(self):$/;"	m	class:ConsumerAgent
 step	cabm_model.py	/^    def step(self):$/;"	m	class:ConsumerModel
 toml	cabm_model.py	/^import toml$/;"	i
 update_adstock	agent_functions.py	/^def update_adstock($/;"	f
 update_brand_preference	cabm_agent.py	/^    def update_brand_preference(self):$/;"	m	class:ConsumerAgent
+update_purchase_history_and_preference	cabm_agent.py	/^    def update_purchase_history_and_preference(self):$/;"	m	class:ConsumerAgent
+update_purchased_this_step	cabm_agent.py	/^    def update_purchased_this_step(self):$/;"	m	class:ConsumerAgent
 warnings	agent_functions.py	/^import warnings$/;"	i

@@ -19,15 +19,27 @@ base_channel_preferences = {TV = 0.20, Web = 0.80} # if using other channels, ad
 
 ad_decay_factor = 2.0 # the higher the number, the faster the adstock decay, this just divides the adstock by the number each week
 ad_decay_override = 0
+adstock_incremental_sensitivty = 1.0 # controls how steep probability curve is that agent will purchase incremental units
+adstock_incremental_midpoint = 1000.0 # adstock level at which there is 50% chance agent will purchase incremental units
 
 # Purchase loyalty - upper and lower bounds for beta distribution over agents
 loyalty_alpha = 20
 loyalty_beta = 2
 loyalty_rate_override = 0
 
+# Purchase history window range - after x purchases of brand y, brand preference is set to y
+purchase_history_range_lower = 3
+purchase_history_range_upper = 6 # uses python range so will be n-1
+
+
+# Price elasticity config mean values - via get_probability_of_change_in_units_purchased_due_to_price()
+price_increase_sensitivity = 5
+price_decrease_sensitivity = 10
+price_threshold = 0.01
+
 [brands]
 # Base product price - the sticker price of a product
-# Promo calendar - the period (campaign) and percentage of the base price that a promo reduces the price by
+# Promo calendar - WARNING - this is a misnomer, it actually just a price multiplier (increasse or discount) for the stated period (campaign)
 # Current market share - the percentage of the market that a brand currently has
 # Advertising budget - the amount of money spent on advertising
 # Advertising channels - the channels that a brand advertises on
@@ -37,10 +49,10 @@ loyalty_rate_override = 0
 
 [brands.A]
 name = "Brand A"
-current_market_share = 0.7
+current_market_share = 0.50
 base_product_price = 5.0
 [brands.A.promotions]
-promo_calendar = {spring_sale = 0.0, back_to_school = 0.0}
+promo_calendar = {spring_sale = 0.90, back_to_school = 1.1} # 0.9 is a 10% discount, 1.1 is a 10% increase
 [brands.A.advertising]
 budget = 1000000.0
 channels = ["TV", "Web"]
@@ -49,7 +61,7 @@ ad_campaigns = {TV = "quick_lag_2", Web = "back_to_school"}
 
 [brands.B]
 name = "Brand B"
-current_market_share = 0.3
+current_market_share = 0.5
 base_product_price = 5.0
 [brands.B.promotions]
 promo_calendar = {holiday_season = 0.0, summer_sale = 0.0}

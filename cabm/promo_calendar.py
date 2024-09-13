@@ -18,6 +18,12 @@ def prepare_promo_schedule_variables(
     Raises:
         KeyError: If a necessary key is not found in the configuration.
         Exception: If an unexpected error occurs.
+
+    Note:
+        The term 'depth' is now used to represent both discounts and price increases.
+        - For discounts, use values less than 1 (e.g., 0.9 for a 10% discount).
+        - For price increases, use values greater than 1 (e.g., 1.1 for a 10% increase).
+        The term 'depth' is a misnomer in this context, but it is retained for backward compatibility.
     """
     try:
         # Extract brand and promotion information from the configuration
@@ -37,7 +43,7 @@ def prepare_promo_schedule_variables(
             if campaign not in config["campaign_library"]:
                 raise KeyError(f"{campaign} is not found in the configuration.")
             for week in config["campaign_library"][campaign]:
-                discounted_price = base_product_price * (1 - depth)
+                discounted_price = base_product_price * (1 if depth == 0 else depth)
                 # If the week already exists in the promo calendar and the new discounted price is lower, update it
                 if (
                     week not in promo_calendar

@@ -11,9 +11,9 @@ from .model_functions import (
     compute_average_purchase_probability,
 )
 
-# Set up logger
+# # Set up logger
 # logger = logging.getLogger()
-# logger.setLevel(logging.INFO)
+# logger.setLevel(logging.DEBUG)
 
 # # Create a log file with current date and time
 # logfile = datetime.datetime.now().strftime("log_%m%d%y%H%M%p.log")
@@ -39,7 +39,7 @@ class ConsumerModel(mesa.Model):
         schedule (mesa.time.RandomActivation): The schedule of agent activation.
         week_number (int): The current week number in the simulation.
         enable_ads (bool): Flag to enable ads.
-        enable_pricepoint (bool): Flag to enable pricepoint.
+        compare_brand_prices (bool): Flag to enable pricepoint.
         brand_list (List[str]): List of available brands in the market.
         datacollector (mesa.DataCollector): Data collector to collect model and agent level data.
 
@@ -52,9 +52,10 @@ class ConsumerModel(mesa.Model):
         self,
         N: int,
         config_file: str,
-        enable_ads: bool = True,
-        enable_pricepoint: bool = True,
+        enable_ads: bool = False,
+        compare_brand_prices: bool = False,
         enable_ad_increment: bool = False,
+        enable_elasticity: bool = False,
     ):
         """
         Initialize the ConsumerModel.
@@ -63,7 +64,7 @@ class ConsumerModel(mesa.Model):
             N (int): Number of agents.
             config_file (str): Path to the configuration file.
             enable_ads (bool, optional): Flag to enable impact of adstock on purchase probability. Defaults to true.
-            enable_pricepoint (bool, optional): Flag to enable impact of pricepoint on purchase probability. Defaults to True.
+            enable_compare_brand_prices (bool, optional): Flag to enable impact of pricepoint on purchase probability. Defaults to True.
             enable_ad_increment (bool, optional): Flag to enable expanded consumption (incremental purchase) based on advertisting. Defaults to False.
         """
         super().__init__()
@@ -76,8 +77,9 @@ class ConsumerModel(mesa.Model):
         self.schedule: mesa.time.RandomActivation = mesa.time.RandomActivation(self)
         self.week_number: int = 1  # Initialize week_number attribute
         self.enable_ads: bool = enable_ads
-        self.enable_pricepoint: bool = enable_pricepoint
+        self.compare_brand_prices: bool = compare_brand_prices
         self.enable_ad_increment = enable_ad_increment
+        self.enable_elasticity = enable_elasticity
         self.brand_list: List[str] = self.config.brand_list
 
         # Create agents
@@ -103,9 +105,14 @@ class ConsumerModel(mesa.Model):
             "Purchased_This_Step": "purchased_this_step",
             "Current_Price": "current_price",
             "Last_Product_Price": "last_product_price",
-            "Purchase_Behavior": "purchase_behavior",
             "Step_Min": "step_min",
             "Step_Max": "step_max",
+            "Units_to_Purchase": "units_to_purchase",
+            "Baseline_Units": "baseline_units",
+            "Incremental_Promo_Units": "incremental_promo_units",
+            "Incremental_Ad_Units": "incremental_ad_units",
+            "Decremental_Units": "decremental_units",
+            "Price_Change": "price_change",
         }
 
         for brand, attribute in self.config.joint_calendar.columns:

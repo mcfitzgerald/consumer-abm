@@ -74,10 +74,24 @@ def sample_beta_min(
     return sample
 
 
+def logistic_function(x: float) -> float:
+    """
+    Logistic function to map any real-valued number into the range (0, 1).
+
+    Parameters:
+    x (float): The input value.
+
+    Returns:
+    float: The output of the logistic function.
+    """
+    return 1 / (1 + math.exp(-x))
+
+
 def magnitude_adjusted_softmax(
     x: np.ndarray,
     log_transform: bool = True,
     inverse: bool = False,
+    magnitude_adjusted_temperature=True,
 ) -> np.ndarray:
     """
     Compute softmax values for each set of scores in x, with adjustments for magnitude.
@@ -96,8 +110,11 @@ def magnitude_adjusted_softmax(
             return np.full(x.shape, 1.0 / x.size)
 
         # Set temperature relative to max value in x. This is done before the overflow prevention step
-        temperature = max(1, np.floor(np.log(np.max(x))))
-        logging.debug(f"Temperature for softmax calculation: {temperature}")
+        if magnitude_adjusted_temperature:
+            temperature = max(1, np.log(np.max(x)))
+            logging.debug(f"Temperature for softmax calculation: {temperature}")
+        else:
+            temperature = 1
 
         # If log_transform is True, apply log transformation to x
         if log_transform:
@@ -154,7 +171,9 @@ def get_pantry_max(household_size: int, pantry_min: int) -> int:
     return pantry_max
 
 
-def assign_weights(items: List[str], prior_weights: List[float]) -> Dict[str, float]:
+def assign_media_channel_weights(
+    items: List[str], prior_weights: List[float]
+) -> Dict[str, float]:
     """
     This function is used to randomize media channel preferences for each agent by assigning weights to items.
     The weights are calculated by adding random fluctuations to the prior weights and then normalizing them.
@@ -232,7 +251,7 @@ def calculate_adstock(
     return adstock
 
 
-def ad_decay(adstock: Dict[str, float], factor: float) -> Dict[str, float]:
+def decay_adstock(adstock: Dict[str, float], factor: float) -> Dict[str, float]:
     """
     This function applies a decay factor to the adstock of each brand. If the resulting adstock is less than 1,
     it is set to 1.
@@ -292,6 +311,36 @@ def update_adstock(
         print(f"An unexpected error occurred: {e}")
     # Return the updated adstock dictionary
     return updated_adstock
+
+
+def get_probability_of_change_in_units_purchased_due_to_adstock(
+    adstock: float,
+    sensitivity: float = 1,
+    midpoint: float = 1000,
+    limit: float = 500,
+) -> float:
+    """
+    This function calculates the probability of an additional purchase based on the adstock value.
+
+    Parameters:
+    adstock (float): The adstock value.
+    sensitivity (float): The sensitivity factor for adstock. Default is 1.
+    midpoint (float): The midpoint of the logistic curve. Default is 1000.
+    limit (float): The adstock limit above which the probability is 0. Default is 10000.
+
+    Returns:
+    float: The probability of an additional purchase.
+    """
+    # If adstock is less than or equal to the limit, return 0
+    if adstock <= limit:
+        return 0.0
+
+    # Use the logistic function to model the probability
+    probability = 1 / (
+        1 + np.exp(-sensitivity * (np.log10(adstock) - np.log10(midpoint)))
+    )
+
+    return probability
 
 
 def get_ad_impact_on_purchase_probabilities(
@@ -381,7 +430,73 @@ def get_current_price(week: int, joint_calendar: pd.DataFrame, brand: str) -> fl
     return price
 
 
-def get_price_impact_on_purchase_probabilities(
+def get_percent_change_in_price(reference_price: float, current_price: float) -> float:
+    """
+    Calculate the percent change between the reference price and the current price.
+
+    Args:
+        reference_price (float): The initial price to compare against.
+        current_price (float): The current price to compare with the reference price.
+
+    Returns:
+        float: The percent change expressed as a decimal.
+
+    Raises:
+        ValueError: If the reference price is zero, as percent change cannot be calculated.
+    """
+    if reference_price == 0:
+        raise ValueError("Reference price cannot be zero.")
+
+    difference = current_price - reference_price
+    percent_change = difference / reference_price
+    return percent_change
+
+
+def get_probability_of_change_in_units_purchased_due_to_price(
+    reference_price: float,
+    current_price: float,
+    sensitivity_increase: float = 5,
+    sensitivity_decrease: float = 10,
+    threshold: float = 0.01,
+) -> float:
+    """
+    Calculate the probability of a change in units purchased based on the price change.
+
+    This function models price elasticity, returning the probability that an agent will purchase more or fewer units
+    based on the change in price. It uses a logistic function to determine the probability.
+
+    Parameters:
+    reference_price (float): The reference price.
+    current_price (float): The current price.
+    sensitivity_increase (float, optional): The sensitivity factor for price increases. Default is 5.
+    sensitivity_decrease (float, optional): The sensitivity factor for price decreases. Default is 10.
+    threshold (float, optional): The threshold around zero percent difference where the probability is zero. Default is 0.01.
+
+    Returns:
+    float: The probability of purchasing more units (for a price decrease) or fewer units (for a price increase).
+    """
+    percent_change = get_percent_change_in_price(reference_price, current_price)
+
+    # Handle the threshold around zero percent difference
+    if abs(percent_change) < threshold:
+        return 0.0
+
+    # Use the logistic function to model the probability
+    if percent_change < 0:
+        # For a price decrease, the probability of purchasing more units increases
+        probability = logistic_function(
+            abs(percent_change) * sensitivity_decrease
+        )  # Adjust the sensitivity with the scaling factor
+    else:
+        # For a price increase, the probability of purchasing fewer units increases
+        probability = logistic_function(
+            abs(percent_change) * sensitivity_increase
+        )  # Adjust the sensitivity with the scaling factor
+
+    return probability
+
+
+def get_price_impact_on_brand_choice_probabilities(
     week_number: int,
     brand_list: List[str],
     joint_calendar: pd.DataFrame,
