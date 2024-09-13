@@ -1,2 +1,0 @@
-the adstock limit for incremental purchases is hard coded and should be made dynamic and defined in config
-something is wrong with the incremental purchase functions - incremental ad units are showing up even when there are no ads being run
