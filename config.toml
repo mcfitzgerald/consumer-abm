@@ -49,7 +49,7 @@ price_threshold = 0.01
 
 [brands.A]
 name = "Brand A"
-current_market_share = 0.50
+current_market_share = 0.70
 base_product_price = 5.0
 [brands.A.promotions]
 promo_calendar = {spring_sale = 0.90, back_to_school = 1.1} # 0.9 is a 10% discount, 1.1 is a 10% increase
@@ -61,7 +61,7 @@ ad_campaigns = {TV = "quick_lag_2", Web = "back_to_school"}
 
 [brands.B]
 name = "Brand B"
-current_market_share = 0.5
+current_market_share = 0.30
 base_product_price = 5.0
 [brands.B.promotions]
 promo_calendar = {holiday_season = 0.0, summer_sale = 0.0}
