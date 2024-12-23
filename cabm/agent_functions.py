@@ -326,7 +326,7 @@ def get_probability_of_change_in_units_purchased_due_to_adstock(
     adstock (float): The adstock value.
     sensitivity (float): The sensitivity factor for adstock. Default is 1.
     midpoint (float): The midpoint of the logistic curve. Default is 1000.
-    limit (float): The adstock limit above which the probability is 0. Default is 10000.
+    limit (float): The adstock belowwhich the probability is 0. Default is 500.
 
     Returns:
     float: The probability of an additional purchase.
