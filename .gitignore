@@ -183,3 +183,6 @@ packages.html
 
 # image exports
 *.png
+
+# random files
+*.vscode

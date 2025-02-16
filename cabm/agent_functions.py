@@ -175,34 +175,31 @@ def assign_media_channel_weights(
     items: List[str], prior_weights: List[float]
 ) -> Dict[str, float]:
     """
-    This function is used to randomize media channel preferences for each agent by assigning weights to items.
-    The weights are calculated by adding random fluctuations to the prior weights and then normalizing them.
-
-    Parameters:
-    items (List[str]): A list of items.
-    prior_weights (List[float]): A list of prior weights for the items.
-
-    Returns:
-    Dict[str, float]: A dictionary mapping items to their weights.
+    For example, if:
+    items = ['Web', 'TV']
+    prior_weights = [0.7, 0.3]  # The desired 70/30 split
     """
-    try:
-        # Generate random fluctuations for each item
-        fluctuations = [random.random() for _ in items]
 
-        # Apply fluctuations to prior weights to create new weights
-        weights = [w + f for w, f in zip(prior_weights, fluctuations)]
+    # Generate fluctuations between -0.1 and 0.1 for each channel
+    # (random.random() gives 0-1, so (random.random() - 0.5) gives -0.5 to 0.5
+    # multiply by 0.2 to get -0.1 to 0.1)
+    fluctuations = [(random.random() - 0.5) * 0.2 for _ in items]
+    # Example: fluctuations might be [0.05, -0.03]
 
-        # Calculate the sum of the weights
-        weight_sum = sum(weights)
+    # Apply fluctuations multiplicatively (1 + fluctuation)
+    # For Web (0.7): 0.7 * (1 + 0.05) = 0.735
+    # For TV (0.3): 0.3 * (1 - 0.03) = 0.291
+    weights = [max(0.001, w * (1 + f)) for w, f in zip(prior_weights, fluctuations)]
+    # The max() ensures no negative weights
 
-        # Normalize weights so they sum to 1 by dividing each weight by the sum of weights
-        weights = [w / weight_sum for w in weights]
+    # Normalize to ensure sum = 1
+    # Sum = 0.735 + 0.291 = 1.026
+    # Web: 0.735/1.026 = 0.716 (≈70%)
+    # TV: 0.291/1.026 = 0.284 (≈30%)
+    weight_sum = sum(weights)
+    weights = [w / weight_sum for w in weights]
 
-        # Create a dictionary to map items to their weights
-        weights_dict = dict(zip(items, weights))
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-    return weights_dict
+    return dict(zip(items, weights))
 
 
 # ADVERTISING IMPACT FUNCTIONS
