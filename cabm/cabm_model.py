@@ -76,9 +76,9 @@ class ConsumerModel(mesa.Model):
 
         self.datacollector = mesa.DataCollector(
             model_reporters={
-                "Total_Purchases": compute_total_purchases,
-                "Average_Product_Price": compute_average_price,
-                "Average_Purchase_Probability": compute_average_purchase_probability,
+                # "Total_Purchases": compute_total_purchases,
+                # "Average_Product_Price": compute_average_price,
+                # "Average_Purchase_Probability": compute_average_purchase_probability,
                 "Week_Number": "week_number",
             },
             agent_reporters=agent_reporters,

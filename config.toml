@@ -7,7 +7,7 @@ base_consumption_rate = 3
 consumption_rate_override = 0
 pantry_min_percent = 0.1
 base_channel_preferences = { TV = 0.30, Web = 0.70 }
-ad_decay_factor = 2.0
+ad_decay_factor = 4.0
 ad_decay_override = 0
 adstock_incremental_sensitivty = 3.0
 adstock_incremental_midpoint = 100.0
