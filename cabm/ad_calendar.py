@@ -1,3 +1,5 @@
+# cabm/ad_calendar.py
+
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Any, Callable, Optional, Tuple
@@ -5,39 +7,32 @@ from typing import Dict, List, Any, Callable, Optional, Tuple
 
 def prepare_ad_schedule_variables(
     brand: str, config: Dict[str, Any]
-) -> Optional[Tuple[int, List[str], Dict[str, int], Dict[str, List[int]]]]:
+) -> Optional[Tuple[float, List[str], Dict[str, int], Dict[str, List[int]]]]:
     """
-    Prepare the variables needed for the generate_brand_ad_schedule function.
-
-    Parameters:
-    brand (str): The brand for which the ad schedule is to be prepared.
-    config (Dict[str, Any]): A dictionary that contains the information for all brands and their advertising campaigns.
-                             It should be read from a toml file prior to calling this function.
-
-    Returns:
-    Tuple[int, List[str], Dict[str, int], Dict[str, List[int]]]: A tuple containing the budget, media channels, priority, and schedule for the specified brand.
-                                                                 Returns None if a KeyError or any other exception occurs.
+    Prepare the variables needed for the generate_brand_ad_schedule function
+    from the config. For a brand, read:
+      - total budget
+      - channels
+      - channel priorities
+      - campaign schedule
     """
     try:
-        # Extract the relevant information for the specified brand from the config dictionary
         brand_info = config["brands"][brand]
         ad_info = brand_info["advertising"]
 
-        # Extract the budget, media channels, and priority for the specified brand
         budget = ad_info["budget"]
         media_channels = ad_info["channels"]
         priority = ad_info["priority"]
 
-        # Construct the schedule dictionary where the keys are the media channels and the values are the corresponding ad campaigns
+        # Map channel->week list from campaign_library
         schedule = {
             channel: config["campaign_library"][campaign]
             for channel, campaign in ad_info["ad_campaigns"].items()
         }
 
-        # Return the prepared variables as a tuple
         return budget, media_channels, priority, schedule
     except KeyError as e:
-        print(f"KeyError: {e} is not found in the config.")
+        print(f"KeyError: {e} not found in the config.")
         return None
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -52,61 +47,39 @@ def generate_brand_ad_schedule(
     spending_strategy: Optional[Callable[[int], List[float]]] = None,
 ) -> Optional[pd.DataFrame]:
     """
-    Generate a marketing ad schedule.
-
-    This function creates a DataFrame that represents the ad schedule for a brand.
-    The ad schedule is created based on the budget, media channels, priority, schedule, and spending strategy.
-
-    Parameters:
-    budget (float): The total marketing budget.
-    media_channels (List[str]): A list of media channels.
-    priority (Dict[str, int]): A dictionary where the keys are the media channels and the values are the priority of each channel.
-    schedule (Dict[str, List[int]]): A dictionary where the keys are the media channels and the values are lists of weeks during which the campaigns are run.
-    spending_strategy (Callable[[int], List[float]], optional): A function that takes the number of weeks and returns a list of proportions that represent the spending distribution across the weeks. Defaults to None.
-
-    Returns:
-    pd.DataFrame: A DataFrame that represents the ad schedule. Returns None if an error occurs.
+    Generate a marketing ad schedule for a brand across 52 weeks, distributing
+    the brand's budget by channel, week, etc. Returns a DataFrame with columns
+    for each media channel, index=1..52 weeks.
     """
     try:
-        # Check if the sum of priority values is 100
         assert sum(priority.values()) == 100, "Priority values must sum to 100"
-
-        # Create a DataFrame with 52 weeks as index and the media channels as columns
         df = pd.DataFrame(index=pd.RangeIndex(1, 53), columns=media_channels)
+        df = df.fillna(0.0)
 
-        # Fill the DataFrame with zeros
-        df = df.fillna(0)
-
-        # Loop over each media channel
         for channel in media_channels:
-            # Skip the channel if no schedule is defined
-            if len(schedule[channel]) == 0:
-                print(
-                    f"Warning: No schedule defined for {channel}. Skipping this channel."
-                )
+            if channel not in schedule or len(schedule[channel]) == 0:
                 continue
 
-            # If no spending strategy is provided, distribute the budget evenly across the weeks
             if spending_strategy is None:
-                spending_distribution = [1 / len(schedule[channel])] * len(
-                    schedule[channel]
-                )
+                # evenly
+                n = len(schedule[channel])
+                spending_distribution = [1 / n] * n
             else:
                 spending_distribution = spending_strategy(len(schedule[channel]))
 
-            # Distribute the budget across the weeks based on the spending distribution
-            for week, proportion in zip(schedule[channel], spending_distribution[:-1]):
-                df.loc[week, channel] = round(
-                    budget * (priority[channel] / 100) * proportion, 2
-                )
+            # sum-of-priority for channel
+            channel_budget = budget * (priority[channel] / 100.0)
 
-            # Adjust the budget for the last week to ensure the total budget for the channel is correct
-            df.loc[schedule[channel][-1], channel] = (
-                budget * (priority[channel] / 100) - df[channel].sum()
-            )
-
-        # Replace any remaining NaN values with 0
-        df = df.replace(np.nan, 0)
+            # fill each scheduled week
+            for idx, week in enumerate(schedule[channel]):
+                if idx < len(spending_distribution) - 1:
+                    df.loc[week, channel] = round(
+                        channel_budget * spending_distribution[idx], 2
+                    )
+                else:
+                    # final leftover to ensure sum matches
+                    spent_so_far = df[channel].sum()
+                    df.loc[week, channel] = round(channel_budget - spent_so_far, 2)
 
         return df
     except AssertionError as e:

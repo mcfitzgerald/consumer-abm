@@ -1,77 +1,48 @@
 title = "Consumer Model"
 
 [household]
-# Number of persons in household - approx percentage for 1,2...7 people in USA - from Statista
 household_sizes = [1,2,3,4,5,6,7]
 household_size_distribution = [0.28,0.36,0.15,0.12,0.06,0.02,0.01]
-
-# Consumption rate: number of steps per person neded to consume 1 product
-# E.g. a consumption rate of 3 means that a product is consumed by one person in 3 steps
-# Concretely, that could mean a tube of toothpaste takes 3 weeks to use per person
-# Consumption rates are defined statistically via absolute value of a normal distribution
 base_consumption_rate = 3
 consumption_rate_override = 0
-
-# Pantry minimum percent (percent of household size)
-pantry_min_percent = 0.1 # when pantry drops below 10% of household size, consumer must buy to replenish
-
-base_channel_preferences = {TV = 0.30, Web = 0.70} # if using other channels, add them here - must sum to 1
-
-ad_decay_factor = 2.0 # the higher the number, the faster the adstock decay, this just divides the adstock by the number each week
+pantry_min_percent = 0.1
+base_channel_preferences = { TV = 0.30, Web = 0.70 }
+ad_decay_factor = 2.0
 ad_decay_override = 0
-adstock_incremental_sensitivty = 3.0 # controls how steep probability curve is that agent will purchase incremental units
-adstock_incremental_midpoint = 100.0 # adstock level at which there is 50% chance agent will purchase incremental units
-
-# Purchase loyalty - upper and lower bounds for beta distribution over agents
+adstock_incremental_sensitivty = 3.0
+adstock_incremental_midpoint = 100.0
 loyalty_alpha = 20
 loyalty_beta = 2
 loyalty_rate_override = 0.7
-
-# Purchase history window range - after x purchases of brand y, brand preference is set to y
 purchase_history_range_lower = 3
-purchase_history_range_upper = 6 # uses python range so will be n-1
-
-
-# Price elasticity config mean values - via get_probability_of_change_in_units_purchased_due_to_price()
+purchase_history_range_upper = 6
 price_increase_sensitivity = 5
 price_decrease_sensitivity = 10
 price_threshold = 0.01
-
-[brands]
-# Base product price - the sticker price of a product
-# Promo calendar - WARNING - this is a misnomer, it actually just a price multiplier (increasse or discount) for the stated period (campaign)
-# Current market share - the percentage of the market that a brand currently has
-# Advertising budget - the amount of money spent on advertising
-# Advertising channels - the channels that a brand advertises on
-# Advertising priority - the percentage of the budget that is spent on each channel
-# Advertising campaigns - the campaigns that a brand runs, specifically the week numbers it is active
-# Advertising spend structure - how budget is allocated over the course of a campaign
 
 [brands.A]
 name = "Brand A"
 current_market_share = 0.70
 base_product_price = 5.0
 [brands.A.promotions]
-promo_calendar = {spring_sale = 0.0, back_to_school = 0.0} # 0.9 is a 10% discount, 1.1 is a 10% increase
+promo_calendar = { spring_sale = 0.0, back_to_school = 0.0 }
 [brands.A.advertising]
 budget = 1000000.0
 channels = ["TV", "Web"]
-priority = {TV = 50, Web = 50}
-ad_campaigns = {TV = "quick_lag_2", Web = "back_to_school"}
+priority = { TV = 50, Web = 50 }
+ad_campaigns = { TV = "quick_lag_2", Web = "back_to_school" }
 
 [brands.B]
 name = "Brand B"
 current_market_share = 0.30
 base_product_price = 5.0
 [brands.B.promotions]
-promo_calendar = {holiday_season = 0.0, summer_sale = 0.0}
+promo_calendar = { holiday_season = 0.0, summer_sale = 0.0 }
 [brands.B.advertising]
 budget = 0.0
 channels = ["TV", "Web"]
-priority = {TV = 20, Web = 80}
-ad_campaigns = {TV = "spring_sale", Web = "holiday_season"}
-
-# You can add additional brands here
+priority = { TV = 20, Web = 80 }
+ad_campaigns = { TV = "spring_sale", Web = "holiday_season" }
 
 [campaign_library]
 first_three_weeks_per_quarter = [1, 2, 3, 14, 15, 16, 27, 28, 29, 40, 41, 42]
@@ -79,11 +50,10 @@ holiday_season = [47, 48, 49, 50]
 back_to_school = [32, 33, 34, 35]
 summer_sale = [27, 28, 29, 30]
 black_friday = [47]
-spring_sale = [15, 16, 17, 18]  
-valentines_day = [6, 7]  
-easter_holiday = [13, 14]  
-halloween = [44]  
-cyber_monday = [48] 
-# You can add custom campaigns here
+spring_sale = [15, 16, 17, 18]
+valentines_day = [6, 7]
+easter_holiday = [13, 14]
+halloween = [44]
+cyber_monday = [48]
 quick_lag = [3,4,5]
 quick_lag_2 = [5,6,7,8]
